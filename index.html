@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Converge - Project Scheduler</title>
+    <title>Converge - Press Engineering Scheduler</title>
     <style>
         :root {
             --bg: #fcfcfc;
@@ -14,201 +14,159 @@
             --build: #4361ee;
             --elec: #f77f00;
             --test: #d62828;
-            --empty: #eeeeee;
+            --empty: #f1f3f5;
         }
 
+        /* --- 基本レイアウト --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0; background-color: var(--bg); display: flex; height: 100vh; color: #111;
         }
 
-        /* サイドバー */
         .sidebar {
             width: 220px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
             padding: 40px 20px; display: flex; flex-direction: column; flex-shrink: 0;
         }
+
+        .main { flex: 1; padding: 40px 60px; overflow-y: auto; }
+
+        /* --- コンポーネント --- */
         .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 5px; }
         .logo-sub { font-size: 10px; color: var(--text-sub); letter-spacing: 1px; margin-bottom: 40px; }
+        
         .nav-item {
             font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 20px;
-            cursor: pointer; letter-spacing: 0.5px; transition: 0.2s; border-left: 3px solid transparent; padding-left: 10px;
+            cursor: pointer; border-left: 3px solid transparent; padding-left: 10px;
         }
         .nav-item.active { color: var(--primary); border-left-color: var(--primary); }
-        .nav-item:hover { color: var(--primary); }
 
-        /* メイン */
-        .main { flex: 1; padding: 40px 60px; overflow-y: auto; }
-        .header-title { font-size: 32px; font-weight: 800; text-align: center; margin-bottom: 10px; }
-        .header-sub { font-size: 14px; color: var(--text-sub); text-align: center; margin-bottom: 50px; }
-
-        /* 入力カード */
         .card {
             background: white; border: 1px solid var(--border); border-radius: 8px;
-            padding: 40px; max-width: 850px; margin: 0 auto 40px;
+            padding: 30px; max-width: 900px; margin: 0 auto 30px;
         }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
-        .input-group label { font-size: 11px; font-weight: 800; color: var(--text-sub); display: block; margin-bottom: 8px; }
-        .input-group input {
-            width: 100%; border: none; border-bottom: 2px solid #eee; font-size: 24px; font-weight: 600;
-            padding: 5px 0; outline: none; transition: 0.3s;
-        }
-        .input-group input:focus { border-bottom-color: var(--primary); }
 
-        /* バッファ設定 */
-        .buffer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; padding: 20px; background: #fafafa; border-radius: 6px; }
-        .buffer-group label { font-size: 10px; font-weight: 700; color: #aaa; margin-bottom: 5px; display: block; }
-        .buffer-group input { width: 100%; border: 1px solid #ddd; padding: 8px; border-radius: 4px; font-size: 14px; }
+        .input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .input-group label { font-size: 10px; font-weight: 800; color: var(--text-sub); display: block; margin-bottom: 5px; }
+        .input-group input {
+            width: 100%; border: 1px solid #eee; font-size: 15px; font-weight: 600;
+            padding: 10px; border-radius: 4px; box-sizing: border-box;
+        }
+
+        .buffer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; padding: 15px; background: #fff9db; border-radius: 8px; }
 
         .btn-calc {
-            width: 100%; background: var(--primary); color: white; border: none; padding: 20px;
-            font-size: 16px; font-weight: 800; border-radius: 6px; cursor: pointer; margin-top: 30px;
+            width: 100%; background: var(--primary); color: white; border: none; padding: 18px;
+            font-size: 15px; font-weight: 800; border-radius: 8px; cursor: pointer; margin-top: 20px;
         }
 
-        /* 結果エリア */
-        .result-area { display: none; max-width: 850px; margin: 0 auto; }
+        /* --- 結果表示エリア --- */
+        .result-area { display: none; max-width: 900px; margin: 0 auto; }
         
-        /* 1. テキスト詳細を上に配置 */
-        .details-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .detail-card { background: white; border: 1px solid var(--border); padding: 20px; border-radius: 8px; border-top: 4px solid #eee; }
-        .detail-card.build { border-top-color: var(--build); }
-        .detail-card.elec { border-top-color: var(--elec); }
-        .detail-card.test { border-top-color: var(--test); }
-        .detail-label { font-size: 11px; font-weight: 800; color: var(--text-sub); margin-bottom: 5px; }
-        .detail-date { font-size: 15px; font-weight: 700; }
+        .print-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        .details-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .detail-box { background: white; border: 1px solid var(--border); padding: 15px; border-radius: 8px; border-top: 4px solid #ddd; }
+        .detail-box.build { border-top-color: var(--build); }
+        .detail-box.elec { border-top-color: var(--elec); }
+        .detail-box.test { border-top-color: var(--test); }
+        .detail-box h4 { margin: 0; font-size: 11px; color: var(--text-sub); }
+        .detail-box div { font-size: 14px; font-weight: 700; margin-top: 5px; }
 
-        /* 2. ビジュアル工程表を下に配置 */
-        .gantt-container { background: white; border: 1px solid var(--border); padding: 30px; border-radius: 8px; margin-bottom: 30px; }
-        .gantt-chart { display: flex; height: 50px; border-radius: 6px; overflow: hidden; margin-bottom: 10px; background: #f0f0f0; }
-        .gantt-bar { height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; position: relative; }
+        .timeline-box { background: white; border: 1px solid var(--border); padding: 25px; border-radius: 8px; }
+        .gantt-bar { display: flex; height: 60px; border-radius: 6px; overflow: hidden; border: 1px solid #eee; }
         
-        /* ホバー時に日付を表示する実用的なツールチップ */
-        .gantt-bar:hover::after {
-            content: attr(data-tip); position: absolute; top: -35px; background: #333; padding: 4px 8px; border-radius: 4px; white-space: nowrap; z-index: 10;
+        .phase {
+            height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-size: 10px; font-weight: 700; overflow: hidden;
         }
-        
-        .bar-build { background: var(--build); }
-        .bar-elec { background: var(--elec); }
-        .bar-test { background: var(--test); }
-        .bar-empty { background: var(--empty); color: #999; }
+        .phase-dates { font-size: 9px; opacity: 0.9; margin-top: 2px; }
+        .phase-build { background: var(--build); }
+        .phase-elec { background: var(--elec); }
+        .phase-test { background: var(--test); }
+        .phase-empty { background: var(--empty); color: #888; }
 
-        .btn-excel {
-            background: #28a745; color: white; border: none; width: 100%; padding: 15px;
-            font-size: 16px; font-weight: 800; border-radius: 6px; cursor: pointer;
+        .action-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-excel { flex: 1; background: #28a745; color: white; border: none; padding: 15px; font-weight: 800; border-radius: 6px; cursor: pointer; }
+        .btn-print { width: 120px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; }
+
+        /* --- 印刷用設定（印字時に適用される） --- */
+        @media print {
+            .sidebar, .card, .action-btns, .nav-item, button { display: none !important; }
+            body { background: white; }
+            .main { padding: 0; width: 100%; }
+            .result-area { display: block !important; }
+            .card, .detail-box, .timeline-box { border: 1px solid #ccc !important; box-shadow: none !important; }
+            .gantt-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
 
         /* 休日設定カレンダー */
         .calendar-page { display: none; max-width: 1000px; margin: 0 auto; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .month { background: white; border: 1px solid var(--border); padding: 15px; border-radius: 8px; }
-        .month-name { text-align: center; font-weight: 800; margin-bottom: 10px; font-size: 14px; }
-        .days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; }
-        .day { padding: 6px 0; cursor: pointer; border-radius: 4px; transition: 0.2s; }
-        .day:hover { background: #f0f0f0; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .month { background: white; border: 1px solid var(--border); padding: 10px; border-radius: 8px; font-size: 11px; }
+        .day { padding: 4px 0; cursor: pointer; text-align: center; border-radius: 3px; }
         .day.holiday { background: #ffe3e3 !important; color: #e03131; font-weight: bold; }
-        .sun { color: #e03131; } .sat { color: #1971c2; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div class="logo">Converge</div>
-    <div class="logo-sub">PRESS SCHEDULER</div>
+    <div class="logo-sub">ENGINEERING SCHEDULER</div>
     <div style="margin-top: 40px;"></div>
-    <!-- ページ切り替え用ナビ -->
     <div class="nav-item active" id="nav-calc" onclick="showPage('calc')">SCHEDULER</div>
-    <div class="nav-item" id="nav-holiday" onclick="showPage('holiday')">HOLIDAYS</div>
+    <div class="nav-item" id="nav-holiday" onclick="showPage('holiday')">HOLIDAYS SETTING</div>
 </div>
 
 <div class="main">
-    <!-- 計算メイン画面 -->
     <div id="page-calc">
-        <div class="header-title">Universal Scheduler</div>
-        <div class="header-sub">工程逆算による製造スケジュールの見える化</div>
-
         <div class="card">
+            <h3>Project Requirements</h3>
             <div class="input-grid">
-                <div class="input-group">
-                    <label>立会日 (最終期限)</label>
-                    <input type="date" id="deadline">
-                </div>
-                <div class="input-group">
-                    <label>電気工事日数 (日)</label>
-                    <input type="number" id="elecDays" value="1">
-                </div>
-                <div class="input-group">
-                    <label>組立：総工数 (h)</label>
-                    <input type="number" id="buildHours" value="1920">
-                </div>
-                <div class="input-group">
-                    <label>組立：対応人数 (名)</label>
-                    <input type="number" id="buildWorkers" value="2.5" step="0.5">
-                </div>
-                <div class="input-group">
-                    <label>試運転：総工数 (h)</label>
-                    <input type="number" id="testHours" value="280">
-                </div>
-                <div class="input-group">
-                    <label>試運転：対応人数 (名)</label>
-                    <input type="number" id="testWorkers" value="2.5" step="0.5">
-                </div>
+                <div class="input-group"><label>立会日</label><input type="date" id="deadline" value="2026-10-28"></div>
+                <div class="input-group"><label>組立工数(h)</label><input type="number" id="buildHours" value="1920"></div>
+                <div class="input-group"><label>組立人数</label><input type="number" id="buildWorkers" value="2.5" step="0.5"></div>
+                <div class="input-group"><label>試運転工数(h)</label><input type="number" id="testHours" value="280"></div>
+                <div class="input-group"><label>試運転人数</label><input type="number" id="testWorkers" value="2.5" step="0.5"></div>
+                <div class="input-group"><label>電工日数(日)</label><input type="number" id="elecDays" value="1"></div>
             </div>
-
-            <label style="font-size: 11px; font-weight: 800; color: var(--text-sub);">バッファ設定 (空き稼働日)</label>
             <div class="buffer-grid">
-                <div class="buffer-group">
-                    <label>試運転 〜 立会</label>
-                    <input type="number" id="bufT2D" value="1">
-                </div>
-                <div class="buffer-group">
-                    <label>電工 〜 試運転</label>
-                    <input type="number" id="bufE2T" value="10">
-                </div>
-                <div class="buffer-group">
-                    <label>組立 〜 電工</label>
-                    <input type="number" id="bufB2E" value="0">
-                </div>
+                <div class="input-group"><label>試運転〜立会 空き</label><input type="number" id="bufT2D" value="1"></div>
+                <div class="input-group"><label>電工〜試運転 空き</label><input type="number" id="bufE2T" value="10"></div>
+                <div class="input-group"><label>組立〜電工 空き</label><input type="number" id="bufB2E" value="0"></div>
             </div>
-
-            <button class="btn-calc" onclick="calculate()">SCHEDULE GENERATE</button>
+            <button class="btn-calc" onclick="calculate()">GENERATE REPORT</button>
         </div>
 
-        <!-- 結果表示エリア -->
         <div id="result-area" class="result-area">
-            
-            <!-- 1. テキスト詳細（上部） -->
+            <div class="print-header">
+                <h2 style="margin:0; font-size:24px;">Project Schedule Report</h2>
+                <span id="print-timestamp" style="font-size:12px; color:#888;"></span>
+            </div>
+
             <div class="details-grid">
-                <div class="detail-card build">
-                    <div class="detail-label">組立期間 (Build)</div>
-                    <div class="detail-date" id="res-build-txt">-</div>
-                </div>
-                <div class="detail-card elec">
-                    <div class="detail-label">電気工事 (Electrical)</div>
-                    <div class="detail-date" id="res-elec-txt">-</div>
-                </div>
-                <div class="detail-card test">
-                    <div class="detail-label">試運転 (Test Run)</div>
-                    <div class="detail-date" id="res-test-txt">-</div>
+                <div class="detail-box build"><h4>組立 (Assembly)</h4><div id="txt-build">-</div></div>
+                <div class="detail-box elec"><h4>電気工事 (Electrical)</h4><div id="txt-elec">-</div></div>
+                <div class="detail-box test"><h4>試運転 (Test Run)</h4><div id="txt-test">-</div></div>
+            </div>
+
+            <div class="timeline-box">
+                <div style="font-size:10px; font-weight:800; color:#aaa; margin-bottom:10px;">VISUAL TIMELINE</div>
+                <div class="gantt-bar" id="gantt-chart"></div>
+                <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:10px; color:#888; font-weight:bold;">
+                    <span id="label-start">START</span>
+                    <span id="label-end">DEADLINE</span>
                 </div>
             </div>
 
-            <!-- 2. ビジュアル工程表（下部） -->
-            <div class="gantt-container">
-                <div style="font-size: 11px; font-weight: 800; color: #999; margin-bottom: 15px; letter-spacing: 1px;">VISUAL TIMELINE</div>
-                <div class="gantt-chart" id="gantt-chart"></div>
-                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #aaa; font-weight: 700;">
-                    <span id="start-label">-</span>
-                    <span id="end-label">-</span>
-                </div>
+            <div class="action-btns">
+                <button class="btn-excel" onclick="copyExcelData()">Copy for Excel</button>
+                <button class="btn-print" onclick="window.print()">PRINT</button>
             </div>
-
-            <button class="btn-excel" onclick="copyExcelData()">Excel貼り付け用データをコピー</button>
         </div>
     </div>
 
-    <!-- 休日設定画面 -->
     <div id="page-holiday" class="calendar-page">
-        <div class="header-title">Company Holidays</div>
-        <div class="header-sub">社内休日をクリックして設定してください（自動保存されます）</div>
+        <h2 style="text-align:center;">Company Holidays</h2>
         <div id="calendar-grid" class="calendar-grid"></div>
     </div>
 </div>
@@ -217,13 +175,12 @@
     let customHolidays = new Set();
     let computedData = { dayMap: [] };
 
-    // 画面の切り替え
-    function showPage(page) {
-        document.getElementById('page-calc').style.display = page === 'calc' ? 'block' : 'none';
-        document.getElementById('page-holiday').style.display = page === 'holiday' ? 'block' : 'none';
-        document.navItem = document.getElementById('nav-calc').classList.toggle('active', page === 'calc');
-        document.getElementById('nav-holiday').classList.toggle('active', page === 'holiday');
-        if(page === 'holiday') renderCalendars();
+    function showPage(p) {
+        document.getElementById('page-calc').style.display = p === 'calc' ? 'block' : 'none';
+        document.getElementById('page-holiday').style.display = p === 'holiday' ? 'block' : 'none';
+        document.getElementById('nav-calc').classList.toggle('active', p === 'calc');
+        document.getElementById('nav-holiday').classList.toggle('active', p === 'holiday');
+        if(p === 'holiday') renderCalendars();
     }
 
     function formatDateStr(date) {
@@ -231,39 +188,36 @@
     }
 
     window.onload = () => {
-        const saved = localStorage.getItem('press_holidays_v4');
+        const saved = localStorage.getItem('press_holidays_print');
         if (saved) customHolidays = new Set(JSON.parse(saved));
         document.getElementById('deadline').value = "2026-10-28";
     };
 
-    // カレンダーの描画
     function renderCalendars() {
         const grid = document.getElementById('calendar-grid');
         grid.innerHTML = '';
-        const years = [2026, 2027];
-        years.forEach(year => {
+        [2026, 2027].forEach(year => {
             for (let m = 0; m < 12; m++) {
                 const monthDiv = document.createElement('div');
                 monthDiv.className = 'month';
-                monthDiv.innerHTML = `<div class="month-name">${year} / ${m + 1}</div>`;
+                monthDiv.innerHTML = `<div style="text-align:center; font-weight:800; margin-bottom:8px;">${year} / ${m+1}</div>`;
                 const daysDiv = document.createElement('div');
-                daysDiv.className = 'days';
-                const firstDay = new Date(year, m, 1);
-                const lastDay = new Date(year, m + 1, 0);
-                for (let i = 0; i < firstDay.getDay(); i++) daysDiv.appendChild(document.createElement('div'));
-                for (let d = 1; d <= lastDay.getDate(); d++) {
+                daysDiv.style.display = 'grid'; daysDiv.style.gridTemplateColumns = 'repeat(7, 1fr)';
+                const first = new Date(year, m, 1);
+                const last = new Date(year, m + 1, 0);
+                for (let i = 0; i < first.getDay(); i++) daysDiv.appendChild(document.createElement('div'));
+                for (let d = 1; d <= last.getDate(); d++) {
                     const dateObj = new Date(year, m, d);
                     const dateStr = formatDateStr(dateObj);
                     const dDiv = document.createElement('div');
                     dDiv.className = 'day';
-                    if (dateObj.getDay() === 0) dDiv.classList.add('sun');
-                    if (dateObj.getDay() === 6) dDiv.classList.add('sat');
+                    if (dateObj.getDay() === 0 || dateObj.getDay() === 6) dDiv.style.color = '#ccc';
                     if (customHolidays.has(dateStr)) dDiv.classList.add('holiday');
                     dDiv.innerText = d;
                     dDiv.onclick = () => {
                         if (customHolidays.has(dateStr)) customHolidays.delete(dateStr);
                         else customHolidays.add(dateStr);
-                        localStorage.setItem('press_holidays_v4', JSON.stringify([...customHolidays]));
+                        localStorage.setItem('press_holidays_print', JSON.stringify([...customHolidays]));
                         renderCalendars();
                     };
                     daysDiv.appendChild(dDiv);
@@ -286,104 +240,101 @@
         return d;
     }
 
-    function subtractWorkDays(startDate, daysNeeded) {
+    function subtractWorkDays(startDate, days) {
         let current = new Date(startDate);
-        if (daysNeeded <= 1) return current;
+        if (days <= 1) return current;
         let count = 1;
-        while (count < daysNeeded) {
+        while (count < days) {
             current.setDate(current.getDate() - 1);
             if (isWorkDay(current)) count++;
         }
         return current;
     }
 
-    // 計算実行
     function calculate() {
-        const buildHrs = parseFloat(document.getElementById('buildHours').value);
-        const buildWkr = parseFloat(document.getElementById('buildWorkers').value);
-        const buildDays = Math.ceil(buildHrs / (buildWkr * 8));
-        const testHrs = parseFloat(document.getElementById('testHours').value);
-        const testWkr = parseFloat(document.getElementById('testWorkers').value);
-        const testDays = Math.ceil(testHrs / (testWkr * 8));
-        const elecDays = parseInt(document.getElementById('elecDays').value);
+        const bHrs = parseFloat(document.getElementById('buildHours').value);
+        const bWkr = parseFloat(document.getElementById('buildWorkers').value);
+        const bDays = Math.ceil(bHrs / (bWkr * 8));
+        const tHrs = parseFloat(document.getElementById('testHours').value);
+        const tWkr = parseFloat(document.getElementById('testWorkers').value);
+        const tDays = Math.ceil(tHrs / (tWkr * 8));
+        const elecD = parseInt(document.getElementById('elecDays').value);
         const bT2D = parseInt(document.getElementById('bufT2D').value);
         const bE2T = parseInt(document.getElementById('bufE2T').value);
         const bB2E = parseInt(document.getElementById('bufB2E').value);
 
-        const deadlineVal = document.getElementById('deadline').value;
-        if (!deadlineVal) return alert("立会日を選択してください");
-        const deadlineDate = new Date(deadlineVal.replace(/-/g, '/'));
+        const deadline = new Date(document.getElementById('deadline').value.replace(/-/g, '/'));
 
-        // 逆算ロジック
-        let testEnd = new Date(deadlineDate);
-        for(let i=0; i<bT2D; i++) testEnd = getPrevWorkDay(testEnd);
-        const testStart = subtractWorkDays(testEnd, testDays);
+        // 逆算
+        let tEnd = new Date(deadline);
+        for(let i=0; i<bT2D; i++) tEnd = getPrevWorkDay(tEnd);
+        const tStart = subtractWorkDays(testEnd = tEnd, tDays);
 
-        let elecEnd = testStart;
-        for(let i=0; i<bE2T; i++) elecEnd = getPrevWorkDay(elecEnd);
-        const elecStart = subtractWorkDays(elecEnd, elecDays);
+        let eEnd = tStart;
+        for(let i=0; i<bE2T; i++) eEnd = getPrevWorkDay(eEnd);
+        const eStart = subtractWorkDays(eEnd, elecD);
 
-        let buildEnd = elecStart;
-        for(let i=0; i<bB2E; i++) buildEnd = getPrevWorkDay(buildEnd);
-        const buildStart = subtractWorkDays(buildEnd, buildDays);
+        let bEnd = eStart;
+        for(let i=0; i<bB2E; i++) bEnd = getPrevWorkDay(bEnd);
+        const bStart = subtractWorkDays(bEnd, bDays);
 
-        // 表示の更新
-        const fmt = d => d.toLocaleDateString('ja-JP');
-        const fmtShort = d => d.toLocaleDateString('ja-JP', {month:'numeric', day:'numeric'});
+        // UI反映
+        const f = d => d.toLocaleDateString('ja-JP', {month:'numeric', day:'numeric'});
+        const fFull = d => d.toLocaleDateString('ja-JP');
         
-        document.getElementById('res-build-txt').innerText = `${fmt(buildStart)} 〜 ${fmt(buildEnd)}`;
-        document.getElementById('res-elec-txt').innerText = `${fmt(elecStart)} 〜 ${fmt(elecEnd)}`;
-        document.getElementById('res-test-txt').innerText = `${fmt(testStart)} 〜 ${fmt(testEnd)}`;
-        document.getElementById('start-label').innerText = fmt(buildStart);
-        document.getElementById('end-label').innerText = fmt(deadlineDate);
+        document.getElementById('txt-build').innerText = `${fFull(bStart)} 〜 ${fFull(bEnd)}`;
+        document.getElementById('txt-elec').innerText = `${fFull(eStart)} 〜 ${fFull(eEnd)}`;
+        document.getElementById('txt-test').innerText = `${fFull(tStart)} 〜 ${fFull(tEnd)}`;
+        document.getElementById('label-start').innerText = `Start: ${fFull(bStart)}`;
+        document.getElementById('label-end').innerText = `Deadline: ${fFull(deadline)}`;
+        document.getElementById('print-timestamp').innerText = `Generated: ${new Date().toLocaleString()}`;
 
-        // ガントチャート生成
+        // 工程バー生成
         const chart = document.getElementById('gantt-chart');
         chart.innerHTML = '';
         const phases = [
-            { name: '組立', days: buildDays, class: 'bar-build', tip: `組立: ${fmtShort(buildStart)}〜${fmtShort(buildEnd)}` },
-            { name: '空', days: bB2E, class: 'bar-empty', tip: '空きバッファ' },
-            { name: '電工', days: elecDays, class: 'bar-elec', tip: `電工: ${fmtShort(elecStart)}〜${fmtShort(elecEnd)}` },
-            { name: '空', days: bE2T, class: 'bar-empty', tip: '空きバッファ' },
-            { name: '試運', days: testDays, class: 'bar-test', tip: `試運転: ${fmtShort(testStart)}〜${fmtShort(testEnd)}` },
-            { name: '空', days: bT2D, class: 'bar-empty', tip: '空きバッファ' }
+            { name: '組立', days: bDays, cls: 'phase-build', range: `${f(bStart)}-${f(bEnd)}` },
+            { name: '空', days: bB2E, cls: 'phase-empty', range: '' },
+            { name: '電工', days: elecD, cls: 'phase-elec', range: `${f(eStart)}-${f(eEnd)}` },
+            { name: '空', days: bE2T, cls: 'phase-empty', range: '' },
+            { name: '試運', days: tDays, cls: 'phase-test', range: `${f(tStart)}-${f(tEnd)}` },
+            { name: '空', days: bT2D, cls: 'phase-empty', range: '' }
         ];
         const total = phases.reduce((a, b) => a + b.days, 0);
         phases.forEach(p => {
             if(p.days > 0) {
                 const div = document.createElement('div');
-                div.className = `gantt-bar ${p.class}`;
+                div.className = `phase ${p.cls}`;
                 div.style.width = `${(p.days / total) * 100}%`;
-                div.innerText = p.days > 1 ? p.name : ''; // 1日の場合は文字を隠す
-                div.setAttribute('data-tip', p.tip);
+                div.innerHTML = `<div>${p.name}</div><div class="phase-dates">${p.range}</div>`;
                 chart.appendChild(div);
             }
         });
 
         document.getElementById('result-area').style.display = 'block';
-        generateExcelData(buildStart, deadlineDate, { bS: buildStart, bE: buildEnd, eS: elecStart, eE: elecEnd, tS: testStart, tE: testEnd });
+        generateExcel(bStart, deadline, { bS:bStart, bE:bEnd, eS:eStart, eE:eEnd, tS:tStart, tE:tEnd });
     }
 
-    function generateExcelData(rangeStart, rangeEnd, r) {
-        let current = new Date(rangeStart);
-        let output = [];
-        while (current <= rangeEnd) {
-            let label = "";
-            if (isWorkDay(current)) {
-                const cStr = formatDateStr(current);
-                if (cStr >= formatDateStr(r.bS) && cStr <= formatDateStr(r.bE)) label = "組";
-                else if (cStr >= formatDateStr(r.eS) && cStr <= formatDateStr(r.eE)) label = "電";
-                else if (cStr >= formatDateStr(r.tS) && cStr <= formatDateStr(r.tE)) label = "試";
-                else label = "空";
+    function generateExcel(s, e, r) {
+        let curr = new Date(s);
+        let out = [];
+        while(curr <= e) {
+            let l = "";
+            if(isWorkDay(curr)) {
+                const cStr = formatDateStr(curr);
+                if(cStr >= formatDateStr(r.bS) && cStr <= formatDateStr(r.bE)) l = "組";
+                else if(cStr >= formatDateStr(r.eS) && cStr <= formatDateStr(r.eE)) l = "電";
+                else if(cStr >= formatDateStr(r.tS) && cStr <= formatDateStr(r.tE)) l = "試";
+                else l = "空";
             }
-            output.push(label);
-            current.setDate(current.getDate() + 1);
+            out.push(l);
+            curr.setDate(curr.getDate() + 1);
         }
-        computedData.dayMap = output;
+        computedData.dayMap = out;
     }
 
     function copyExcelData() {
-        navigator.clipboard.writeText(computedData.dayMap.join('\t')).then(() => alert("コピーしました！Excelに貼り付けてください。"));
+        navigator.clipboard.writeText(computedData.dayMap.join('\t')).then(() => alert("Excel用データをコピーしました。"));
     }
 </script>
 </body>
