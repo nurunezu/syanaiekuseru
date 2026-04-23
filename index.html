@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Converge - Master Scheduler</title>
+    <title>Converge - Master Project Scheduler</title>
     <style>
         :root {
             --bg: #fcfcfc;
@@ -14,7 +14,7 @@
             --color-build: #4361ee;
             --color-elec: #f77f00;
             --color-test: #d62828;
-            --color-empty: #eeeeee;
+            --color-empty: rgba(238, 238, 238, 0.6);
         }
 
         body {
@@ -29,7 +29,6 @@
         }
         .logo { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
         .logo-sub { font-size: 10px; color: var(--text-sub); letter-spacing: 1px; margin-bottom: 40px; }
-        
         .nav-item {
             text-decoration: none; color: var(--text-sub); font-size: 12px; font-weight: 600;
             margin-bottom: 25px; letter-spacing: 1px; cursor: pointer; transition: 0.2s;
@@ -37,80 +36,69 @@
         }
         .nav-item.active { color: var(--primary); border-left-color: var(--primary); }
 
-        /* メインコンテンツ */
-        .main { flex: 1; padding: 40px 60px; overflow-y: auto; }
-        .header-title { font-size: 28px; font-weight: 700; text-align: left; margin-bottom: 10px; }
-        .header-sub { font-size: 14px; color: var(--text-sub); text-align: left; margin-bottom: 40px; }
+        /* メインエリア */
+        .main { flex: 1; padding: 40px 60px; overflow-y: auto; position: relative; }
+        .header-title { font-size: 28px; font-weight: 700; margin-bottom: 30px; }
 
-        /* 入力エリア */
         .card {
             background: white; border: 1px solid var(--border); border-radius: 4px;
-            padding: 40px; max-width: 800px; margin-bottom: 40px;
+            padding: 30px; max-width: 900px; margin-bottom: 40px;
         }
 
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
-        .input-group label { font-size: 10px; font-weight: bold; color: var(--text-sub); text-transform: uppercase; display: block; margin-bottom: 8px; }
-        .input-group input { width: 100%; border: none; border-bottom: 1px solid #eee; font-size: 20px; font-weight: 500; outline: none; padding: 5px 0; }
+        /* フォーム入力 */
+        .input-group { margin-bottom: 20px; }
+        .input-group label { font-size: 10px; font-weight: bold; color: var(--text-sub); text-transform: uppercase; display: block; margin-bottom: 6px; }
+        .input-group input { width: 100%; border: none; border-bottom: 1px solid #eee; font-size: 18px; font-weight: 500; outline: none; padding: 5px 0; box-sizing: border-box;}
         .input-group input:focus { border-bottom-color: var(--primary); }
 
-        .buffer-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; border-top: 1px solid var(--border); padding-top: 30px; margin-top: 20px; }
-        .buffer-group label { font-size: 9px; font-weight: bold; color: var(--text-sub); margin-bottom: 5px; display: block; }
-        .buffer-group input { background: #f9f9f9; border: 1px solid var(--border); padding: 8px; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
+        .input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .buffer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; background: #fafafa; padding: 15px; border-radius: 4px; margin-top: 10px;}
 
-        .btn-calc { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 30px; font-size: 14px; }
+        .btn-calc { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 25px; }
 
-        /* 結果表示 */
-        .result-area { display: none; max-width: 850px; }
-        .details-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .detail-item { background: white; border: 1px solid var(--border); padding: 20px; border-left: 4px solid #eee; }
-        .detail-item.build { border-left-color: var(--color-build); }
-        .detail-item.elec { border-left-color: var(--color-elec); }
-        .detail-item.test { border-left-color: var(--color-test); }
-        .detail-label { font-size: 11px; font-weight: bold; color: var(--text-sub); margin-bottom: 5px; }
-        .detail-val { font-size: 14px; font-weight: bold; }
-
-        /* 円グラフ */
-        .visual-container { text-align: center; background: white; border: 1px solid var(--border); padding: 40px; border-radius: 4px; display: flex; align-items: center; gap: 40px; }
-        .chart-wrapper { width: 240px; height: 240px; position: relative; flex-shrink: 0; }
-        svg { transform: rotate(-90deg); border-radius: 50%; }
-        circle { fill: none; stroke-width: 35; transition: stroke-dasharray 0.5s ease; cursor: pointer; }
-        .chart-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
-        .chart-info-days { font-size: 28px; font-weight: bold; }
-
-        .btn-excel { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-
-        /* 保存フォーム */
-        .save-box { border-top: 1px dashed var(--border); margin-top: 40px; padding-top: 30px; max-width: 850px;}
-        .save-grid { display: grid; grid-template-columns: 1fr 1fr 150px; gap: 20px; align-items: flex-end; }
-        .btn-save { background: #f1f3f5; color: var(--primary); border: none; padding: 12px; font-weight: bold; border-radius: 4px; cursor: pointer; }
-
-        /* --- 全体スケジュールボード (History) --- */
-        .master-board { background: white; border: 1px solid var(--border); padding: 0; border-radius: 4px; overflow-x: auto; min-width: 1000px; }
-        .board-header { display: flex; border-bottom: 2px solid var(--primary); background: #f8f9fa; }
-        .board-row { display: flex; border-bottom: 1px solid var(--border); height: 70px; align-items: center; transition: background 0.1s; cursor: pointer;}
-        .board-row:hover { background: #fcfcfc; }
-        .col-info { width: 220px; padding: 15px; border-right: 1px solid var(--border); flex-shrink: 0; position: sticky; left: 0; background: white; z-index: 2; }
-        .company-name { font-size: 14px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .factory-name { font-size: 11px; color: var(--text-sub); }
-        .col-timeline { flex-grow: 1; position: relative; height: 100%; padding: 0 10px; min-width: 800px; }
+        /* 結果エリア：円グラフ(左)と詳細(右) */
+        .result-container { display: flex; align-items: flex-start; gap: 50px; margin-top: 40px; background: white; border: 1px solid var(--border); padding: 40px; border-radius: 4px; display: none; }
         
-        /* タイムラインのバー */
-        .timeline-bar-container { position: absolute; top: 20px; height: 30px; display: flex; border-radius: 4px; overflow: hidden; }
-        .t-segment { height: 100%; font-size: 9px; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; }
-        .t-build { background: var(--color-build); }
-        .t-elec { background: var(--color-elec); }
-        .t-test { background: var(--color-test); }
-        .t-empty { background: var(--color-empty); color: #ccc; }
+        .result-left { width: 240px; flex-shrink: 0; text-align: center; }
+        .chart-wrapper { width: 240px; height: 240px; position: relative; }
+        svg { transform: rotate(-90deg); border-radius: 50%; }
+        circle { fill: none; stroke-width: 35; transition: 0.5s ease; cursor: pointer; }
+        .chart-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+        .chart-info-days { font-size: 32px; font-weight: bold; }
 
-        /* タイムラインの日付軸 */
-        .date-axis { display: flex; height: 30px; align-items: center; font-size: 10px; font-weight: bold; color: var(--text-sub); border-bottom: 1px solid var(--border); }
-        .axis-tick { flex-grow: 1; border-left: 1px solid #eee; padding-left: 5px; height: 100%; display: flex; align-items: center; }
+        .result-right { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .detail-card { margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .detail-card label { font-size: 11px; font-weight: bold; color: var(--text-sub); }
+        .detail-card div { font-size: 16px; font-weight: bold; margin-top: 4px; }
+        
+        .btn-excel { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .btn-save { background: #eee; color: #333; border: none; padding: 10px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 12px;}
 
-        .btn-del-mini { color: #ff6b6b; border: none; background: none; cursor: pointer; font-size: 10px; margin-top: 5px; }
+        /* 全体ボード (透過ガントチャート) */
+        .board-container { min-width: 1000px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 8px; }
+        .board-header { display: flex; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+        .board-row { display: flex; border-bottom: 1px solid var(--border); transition: 0.2s; cursor: pointer; height: 80px; align-items: center; }
+        .board-row:hover { background: rgba(0,0,0,0.01); }
+        
+        .col-meta { width: 200px; padding: 15px; border-right: 1px solid var(--border); flex-shrink: 0; background: white; }
+        .col-timeline { flex: 1; position: relative; height: 100%; display: flex; align-items: center; padding: 0 10px; }
+        
+        .gantt-bar { position: absolute; height: 40px; display: flex; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .gantt-seg { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-size: 8px; font-weight: bold; overflow: hidden; border-right: 1px solid rgba(255,255,255,0.2); }
+        .gantt-seg-date { font-size: 7px; opacity: 0.8; }
+        
+        .seg-build { background: var(--color-build); }
+        .seg-elec { background: var(--color-elec); }
+        .seg-test { background: var(--color-test); }
+        .seg-empty { background: var(--color-empty); color: #999; }
+
+        .time-axis { display: flex; font-size: 10px; font-weight: bold; color: var(--text-sub); border-bottom: 1px solid #eee; height: 30px; align-items: center;}
+        .axis-item { flex: 1; border-left: 1px solid #eee; padding-left: 5px; }
 
         /* 休日設定 */
         .calendar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-        .month { background: white; border: 1px solid var(--border); padding: 10px; font-size: 11px; }
+        .month { background: white; border: 1px solid var(--border); padding: 10px; border-radius: 4px; font-size: 11px; }
+        .day { padding: 4px 0; cursor: pointer; text-align: center; border-radius: 3px; }
         .day.holiday { background: #fee2e2 !important; color: #dc2626; font-weight: bold; }
     </style>
 </head>
@@ -120,16 +108,20 @@
     <div class="logo">Converge</div>
     <div class="logo-sub">Master Scheduler</div>
     <div style="margin-top: 40px;"></div>
-    <div class="nav-item active" id="nav-calc" onclick="showPage('calc')">新規計画作成</div>
+    <div class="nav-item active" id="nav-calc" onclick="showPage('calc')">新規プロジェクト</div>
     <div class="nav-item" id="nav-history" onclick="showPage('history')">全体スケジュール</div>
     <div class="nav-item" id="nav-holiday" onclick="showPage('holiday')">休日設定</div>
 </div>
 
 <div class="main">
-    <!-- 計算画面 -->
+    <!-- 入力画面 -->
     <div id="page-calc">
-        <div class="header-title">新規スケジュール作成</div>
+        <h1 class="header-title">新規プロジェクト作成</h1>
         <div class="card">
+            <!-- 企業・工場名を一番上に移動 -->
+            <div class="input-group"><label>企業名（顧客名）</label><input type="text" id="compName" placeholder="例: 〇〇自動車様"></div>
+            <div class="input-group"><label>工場名（案件名）</label><input type="text" id="factName" placeholder="例: プレスライン更新"></div>
+
             <div class="input-grid">
                 <div class="input-group"><label>立会予定日</label><input type="date" id="deadline" value="2026-10-28"></div>
                 <div class="input-group"><label>組立 総工数 (h)</label><input type="number" id="buildHours" value="1920"></div>
@@ -138,22 +130,18 @@
                 <div class="input-group"><label>組立 人数</label><input type="number" id="buildWorkers" value="2.5" step="0.5"></div>
                 <div class="input-group"><label>試運転 人数</label><input type="number" id="testWorkers" value="2.5" step="0.5"></div>
             </div>
-            <div class="buffer-section">
-                <div class="buffer-group"><label>試運転〜立会 空き</label><input type="number" id="bufT2D" value="1"></div>
-                <div class="buffer-group"><label>電工〜試運転 空き</label><input type="number" id="bufE2T" value="10"></div>
-                <div class="buffer-group"><label>組立〜電工 空き</label><input type="number" id="bufB2E" value="0"></div>
+
+            <div class="buffer-grid">
+                <div class="input-group"><label>試運転〜立会 空き</label><input type="number" id="bufT2D" value="1"></div>
+                <div class="input-group"><label>電工〜試運転 空き</label><input type="number" id="bufE2T" value="10"></div>
+                <div class="input-group"><label>組立〜電工 空き</label><input type="number" id="bufB2E" value="0"></div>
             </div>
-            <button class="btn-calc" onclick="calculate()">計算を実行する</button>
+            <button class="btn-calc" onclick="calculate()">スケジュールを生成する</button>
         </div>
 
-        <div id="result-area" class="result-area">
-            <div class="details-list">
-                <div class="detail-item build"><div class="detail-label">組立期間</div><div id="txt-build" class="detail-val">-</div></div>
-                <div class="detail-item elec"><div class="detail-label">電気工事</div><div id="txt-elec" class="detail-val">-</div></div>
-                <div class="detail-item test"><div class="detail-label">試運転期間</div><div id="txt-test" class="detail-val">-</div></div>
-            </div>
-
-            <div class="visual-container">
+        <!-- 結果画面（左円グラフ、右日程詳細） -->
+        <div id="result-container" class="result-container">
+            <div class="result-left">
                 <div class="chart-wrapper">
                     <svg width="240" height="240" id="pie-chart"></svg>
                     <div class="chart-info">
@@ -161,37 +149,31 @@
                         <div style="font-size: 10px; color: #999;">DAYS</div>
                     </div>
                 </div>
-                <div style="flex-grow:1; text-align:left;">
-                    <div style="font-size: 11px; font-weight: bold; color: var(--text-sub); margin-bottom: 10px;">工程バランス詳細</div>
-                    <div id="chart-hover-date" style="font-size: 14px; font-weight: bold; color: var(--primary); min-height: 1.5em;"></div>
-                    <button class="btn-excel" onclick="copyExcelData()">Excel貼り付け用にコピー</button>
-                </div>
+                <div id="chart-hover-text" style="font-size:12px; font-weight:bold; margin-top:15px; color:var(--color-build); min-height:1.5em;"></div>
             </div>
-
-            <div class="save-box">
-                <div class="save-grid">
-                    <div class="input-group"><label>企業名（顧客名）</label><input type="text" id="save-company" placeholder="〇〇機械工業"></div>
-                    <div class="input-group"><label>工場名（案件名）</label><input type="text" id="save-factory" placeholder="プレス機更新案件"></div>
-                    <button class="btn-save" onclick="saveProject()">計画を保存</button>
-                </div>
+            <div class="result-right">
+                <div class="detail-card"><label>組立期間</label><div id="txt-build">-</div></div>
+                <div class="detail-card"><label>電気工事</label><div id="txt-elec">-</div></div>
+                <div class="detail-card"><label>試運転期間</label><div id="txt-test">-</div></div>
+                
+                <button class="btn-excel" onclick="copyExcelData()">Excel貼り付け用にコピー</button>
+                <button class="btn-save" onclick="saveProject()">この計画を全体ボードに保存</button>
             </div>
         </div>
     </div>
 
-    <!-- 全体スケジュール画面 (History) -->
+    <!-- 全体スケジュール（透過・日次詳細） -->
     <div id="page-history" style="display:none">
-        <div class="header-title">全体スケジュール概要</div>
-        <div class="header-sub">全案件の重なりを時系列で俯瞰します。</div>
-        
-        <div class="master-board">
-            <div id="board-axis" class="date-axis"></div>
-            <div id="history-rows"></div>
+        <h1 class="header-title">全体スケジュール概要</h1>
+        <div class="board-container">
+            <div id="board-axis" class="time-axis"></div>
+            <div id="history-list"></div>
         </div>
     </div>
 
     <!-- 休日設定 -->
     <div id="page-holiday" style="display:none">
-        <div class="header-title">休日設定</div>
+        <h1 class="header-title">休日カレンダー</h1>
         <div id="holiday-grid" class="calendar-grid"></div>
     </div>
 </div>
@@ -201,33 +183,31 @@
     let savedProjects = [];
     let computedData = { dayMap: [], source: null };
 
-    function showPage(pageId) {
+    function showPage(p) {
         document.getElementById('page-calc').style.display = 'none';
         document.getElementById('page-history').style.display = 'none';
         document.getElementById('page-holiday').style.display = 'none';
-        document.getElementById(`page-${pageId}`).style.display = 'block';
-
+        document.getElementById(`page-${p}`).style.display = 'block';
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        document.getElementById(`nav-${pageId}`).classList.add('active');
-
-        if(pageId === 'holiday') renderHolidays();
-        if(pageId === 'history') renderMasterBoard();
+        document.getElementById(`nav-${p}`).classList.add('active');
+        if(p === 'history') renderMasterBoard();
+        if(p === 'holiday') renderHolidays();
     }
 
-    function formatDateStr(date) {
+    function formatDate(date) {
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
 
     window.onload = () => {
         const h = localStorage.getItem('press_holidays');
         if (h) customHolidays = new Set(JSON.parse(h));
-        const p = localStorage.getItem('press_projects_v3');
+        const p = localStorage.getItem('press_master_v1');
         if (p) savedProjects = JSON.parse(p);
     };
 
     function isWorkDay(date) {
         const d = date.getDay();
-        return d !== 0 && d !== 6 && !customHolidays.has(formatDateStr(date));
+        return d !== 0 && d !== 6 && !customHolidays.has(formatDate(date));
     }
 
     function getPrevWorkDay(date) {
@@ -236,7 +216,7 @@
         return d;
     }
 
-    function subtractDays(start, count) {
+    function subtractWorkDays(start, count) {
         let curr = new Date(start);
         if (count <= 1) return curr;
         let c = 1;
@@ -247,29 +227,31 @@
         return curr;
     }
 
-    // 計算ロジック本体
-    function runCalculation(source) {
-        const deadline = new Date(source.deadline.replace(/-/g, '/'));
-        const bDays = Math.ceil(source.bHrs / (source.bWkr * 8));
-        const tDays = Math.ceil(source.tHrs / (source.tWkr * 8));
-
+    // 計算のコア
+    function runLogic(s) {
+        const deadline = new Date(s.deadline.replace(/-/g, '/'));
+        const bDays = Math.ceil(s.bHrs / (s.bWkr * 8));
+        const tDays = Math.ceil(s.tHrs / (s.tWkr * 8));
+        
         let tEnd = new Date(deadline);
-        for(let i=0; i<source.bufT; i++) tEnd = getPrevWorkDay(tEnd);
-        const tStart = subtractDays(tEnd, tDays);
+        for(let i=0; i<s.bufT; i++) tEnd = getPrevWorkDay(tEnd);
+        const tStart = subtractWorkDays(tEnd, tDays);
 
         let eEnd = tStart;
-        for(let i=0; i<source.bufE; i++) eEnd = getPrevWorkDay(eEnd);
-        const eStart = subtractDays(eEnd, source.eD);
+        for(let i=0; i<s.bufE; i++) eEnd = getPrevWorkDay(eEnd);
+        const eStart = subtractWorkDays(eEnd, s.eD);
 
         let bEnd = eStart;
-        for(let i=0; i<source.bufB; i++) bEnd = getPrevWorkDay(bEnd);
-        const bStart = subtractDays(bEnd, bDays);
+        for(let i=0; i<s.bufB; i++) bEnd = getPrevWorkDay(bEnd);
+        const bStart = subtractWorkDays(bEnd, bDays);
 
-        return { bStart, bEnd, bDays, eStart, eEnd, eD: source.eD, tStart, tEnd, tDays, deadline };
+        return { bStart, bEnd, bDays, eStart, eEnd, eD:s.eD, tStart, tEnd, tDays, deadline };
     }
 
-    function calculate(loadSource = null) {
-        const source = loadSource || {
+    function calculate() {
+        const source = {
+            comp: document.getElementById('compName').value,
+            fact: document.getElementById('factName').value,
             deadline: document.getElementById('deadline').value,
             bHrs: parseFloat(document.getElementById('buildHours').value),
             tHrs: parseFloat(document.getElementById('testHours').value),
@@ -281,14 +263,15 @@
             bufB: parseInt(document.getElementById('bufB2E').value)
         };
 
-        const res = runCalculation(source);
+        const res = runLogic(source);
         const f = d => d.toLocaleDateString('ja-JP');
-        
+
         document.getElementById('txt-build').innerText = `${f(res.bStart)} 〜 ${f(res.bEnd)}`;
         document.getElementById('txt-elec').innerText = `${f(res.eStart)} 〜 ${f(res.eEnd)}`;
         document.getElementById('txt-test').innerText = `${f(res.tStart)} 〜 ${f(res.tEnd)}`;
         document.getElementById('total-days-val').innerText = Math.ceil((res.deadline - res.bStart) / (1000*60*60*24));
-        document.getElementById('result-area').style.display = 'block';
+        
+        document.getElementById('result-container').style.display = 'flex';
 
         drawPieChart([
             { name: '組立', days: res.bDays, color: 'var(--color-build)', range: `${f(res.bStart)}-${f(res.bEnd)}` },
@@ -304,8 +287,7 @@
     }
 
     function drawPieChart(phases) {
-        const svg = document.getElementById('pie-chart');
-        svg.innerHTML = '';
+        const svg = document.getElementById('pie-chart'); svg.innerHTML = '';
         const total = phases.reduce((s, p) => s + p.days, 0);
         let offset = 0; const R = 100; const C = 2 * Math.PI * R;
         phases.forEach(p => {
@@ -315,104 +297,87 @@
             circle.setAttribute("stroke", p.color);
             circle.setAttribute("stroke-dasharray", `${(p.days/total)*C} ${C}`);
             circle.setAttribute("stroke-dashoffset", -offset * C);
-            circle.onmouseover = () => document.getElementById('chart-hover-date').innerText = `${p.name}: ${p.range}`;
-            circle.onmouseout = () => document.getElementById('chart-hover-date').innerText = '';
+            circle.onmouseover = () => document.getElementById('chart-hover-text').innerText = `${p.name}: ${p.range}`;
+            circle.onmouseout = () => document.getElementById('chart-hover-text').innerText = '';
             svg.appendChild(circle);
             offset += (p.days/total);
         });
     }
 
     function saveProject() {
-        const company = document.getElementById('save-company').value;
-        const factory = document.getElementById('save-factory').value;
-        if(!company || !factory) return alert("案件情報を入力してください");
-        savedProjects.unshift({ id: Date.now(), company, factory, source: computedData.source });
-        localStorage.setItem('press_projects_v3', JSON.stringify(savedProjects));
+        if(!computedData.source.comp || !computedData.source.fact) return alert("企業名と工場名を入力してください");
+        savedProjects.unshift({ id: Date.now(), ...computedData.source });
+        localStorage.setItem('press_master_v1', JSON.stringify(savedProjects));
         alert("全体スケジュールに保存しました");
     }
 
-    /* --- 全体スケジュールボードの描画 --- */
     function renderMasterBoard() {
-        const rowsContainer = document.getElementById('history-rows');
-        const axisContainer = document.getElementById('board-axis');
-        rowsContainer.innerHTML = '';
-        if (savedProjects.length === 0) {
-            rowsContainer.innerHTML = '<div style="padding:40px; color:#999;">保存された案件はありません。</div>';
-            return;
-        }
+        const list = document.getElementById('history-list');
+        const axis = document.getElementById('board-axis');
+        list.innerHTML = '';
+        if (savedProjects.length === 0) return list.innerHTML = '<p style="padding:20px;">保存データなし</p>';
 
-        // 全案件の計算を実行し、期間を特定する
-        const analyzed = savedProjects.map(p => ({ ...p, res: runCalculation(p.source) }));
+        const analyzed = savedProjects.map(p => ({ ...p, res: runLogic(p) }));
         const allDates = analyzed.flatMap(p => [p.res.bStart, p.res.deadline]);
-        const minDate = new Date(Math.min(...allDates));
-        const maxDate = new Date(Math.max(...allDates));
-        const totalDuration = maxDate - minDate;
+        const minD = new Date(Math.min(...allDates));
+        const maxD = new Date(Math.max(...allDates));
+        const totalDuration = maxD - minD;
 
-        // 日付軸の描画 (月単位)
-        axisContainer.innerHTML = '<div style="width:220px; flex-shrink:0; border-right:1px solid #eee;">案件名 / 工場名</div>';
-        let currMonth = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-        while (currMonth <= maxDate) {
-            const tick = document.createElement('div');
-            tick.className = 'axis-tick';
-            tick.innerText = `${currMonth.getFullYear()}/${currMonth.getMonth()+1}`;
-            axisContainer.appendChild(tick);
-            currMonth.setMonth(currMonth.getMonth() + 1);
+        // 軸
+        axis.innerHTML = '<div style="width:200px; flex-shrink:0;">案件名 / 工場名</div>';
+        let curr = new Date(minD.getFullYear(), minD.getMonth(), 1);
+        while(curr <= maxD) {
+            const item = document.createElement('div');
+            item.className = 'axis-item'; item.innerText = `${curr.getFullYear()}/${curr.getMonth()+1}`;
+            axis.appendChild(item);
+            curr.setMonth(curr.getMonth() + 1);
         }
 
-        // 各案件の行を描画
+        const f = d => `${d.getMonth()+1}/${d.getDate()}`;
+
         analyzed.forEach(p => {
             const row = document.createElement('div');
             row.className = 'board-row';
             row.onclick = () => {
                 showPage('calc');
-                document.getElementById('deadline').value = p.source.deadline;
-                document.getElementById('buildHours').value = p.source.bHrs;
-                document.getElementById('testHours').value = p.source.tHrs;
-                document.getElementById('elecDays').value = p.source.eD;
-                document.getElementById('buildWorkers').value = p.source.bWkr;
-                document.getElementById('testWorkers').value = p.source.tWkr;
-                document.getElementById('bufT2D').value = p.source.bufT;
-                document.getElementById('bufE2T').value = p.source.bufE;
-                document.getElementById('bufB2E').value = p.source.bufB;
-                calculate(p.source);
+                Object.keys(p).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = p[k]; });
+                document.getElementById('compName').value = p.comp;
+                document.getElementById('factName').value = p.fact;
+                calculate();
             };
 
-            const leftPos = ((p.res.bStart - minDate) / totalDuration) * 100;
-            const widthBuild = ((p.res.bEnd - p.res.bStart) / totalDuration) * 100;
-            const widthElec = ((p.res.eEnd - p.res.eStart) / totalDuration) * 100;
-            const widthTest = ((p.res.tEnd - p.res.tStart) / totalDuration) * 100;
-            const gapBE = ((p.res.eStart - p.res.bEnd) / totalDuration) * 100;
-            const gapET = ((p.res.tStart - p.res.eEnd) / totalDuration) * 100;
+            const left = ((p.res.bStart - minD) / totalDuration) * 100;
+            const wB = ((p.res.bEnd - p.res.bStart) / totalDuration) * 100;
+            const wE = ((p.res.eEnd - p.res.eStart) / totalDuration) * 100;
+            const wT = ((p.res.tEnd - p.res.tStart) / totalDuration) * 100;
+            const gBE = ((p.res.eStart - p.res.bEnd) / totalDuration) * 100;
+            const gET = ((p.res.tStart - p.res.eEnd) / totalDuration) * 100;
 
             row.innerHTML = `
-                <div class="col-info">
-                    <div class="company-name">${p.company}</div>
-                    <div class="factory-name">${p.factory}</div>
-                    <button class="btn-del-mini" onclick="deleteP(event, ${p.id})">案件削除</button>
+                <div class="col-meta">
+                    <div style="font-weight:bold; font-size:13px;">${p.comp}</div>
+                    <div style="font-size:10px; color:#999;">${p.fact}</div>
                 </div>
                 <div class="col-timeline">
-                    <div class="timeline-bar-container" style="left:${leftPos}%; width:${100-leftPos}%">
-                        <div class="t-segment t-build" style="width:${(widthBuild/(100-leftPos))*100}%">組立</div>
-                        <div class="t-segment t-empty" style="width:${(gapBE/(100-leftPos))*100}%"></div>
-                        <div class="t-segment t-elec" style="width:${(widthElec/(100-leftPos))*100}%">電</div>
-                        <div class="t-segment t-empty" style="width:${(gapET/(100-leftPos))*100}%"></div>
-                        <div class="t-segment t-test" style="width:${(widthTest/(100-leftPos))*100}%">試運転</div>
+                    <div class="gantt-bar" style="left:${left}%; width:${100-left}%;">
+                        <div class="gantt-seg seg-build" style="width:${(wB/(100-left))*100}%">
+                            組立 <span class="gantt-seg-date">${f(p.res.bStart)}-${f(p.res.bEnd)}</span>
+                        </div>
+                        <div class="gantt-seg seg-empty" style="width:${(gBE/(100-left))*100}%"></div>
+                        <div class="gantt-seg seg-elec" style="width:${(wE/(100-left))*100}%">
+                            電 <span class="gantt-seg-date">${f(p.res.eStart)}</span>
+                        </div>
+                        <div class="gantt-seg seg-empty" style="width:${(gET/(100-left))*100}%"></div>
+                        <div class="gantt-seg seg-test" style="width:${(wT/(100-left))*100}%">
+                            試運転 <span class="gantt-seg-date">${f(p.res.tStart)}-${f(p.res.tEnd)}</span>
+                        </div>
                     </div>
                 </div>
             `;
-            rowsContainer.appendChild(row);
+            list.appendChild(row);
         });
     }
 
-    function deleteP(e, id) {
-        e.stopPropagation();
-        if(!confirm("案件を削除しますか？")) return;
-        savedProjects = savedProjects.filter(p => p.id !== id);
-        localStorage.setItem('press_projects_v3', JSON.stringify(savedProjects));
-        renderMasterBoard();
-    }
-
-    /* 休日・Excel機能 (変更なし) */
     function renderHolidays() {
         const grid = document.getElementById('holiday-grid'); grid.innerHTML = '';
         [2026, 2027].forEach(y => {
@@ -420,10 +385,11 @@
                 const div = document.createElement('div'); div.className='month';
                 div.innerHTML=`<div style="text-align:center;font-weight:bold;">${y}/${m+1}</div>`;
                 const days = document.createElement('div'); days.style.display='grid'; days.style.gridTemplateColumns='repeat(7, 1fr)';
+                const first = new Date(y, m, 1);
+                for(let i=0; i<first.getDay(); i++) days.appendChild(document.createElement('div'));
                 const last = new Date(y,m+1,0).getDate();
-                for(let i=0; i<new Date(y,m,1).getDay(); i++) days.appendChild(document.createElement('div'));
                 for(let d=1; d<=last; d++){
-                    const ds = formatDateStr(new Date(y,m,d));
+                    const ds = formatDate(new Date(y,m,d));
                     const dDiv = document.createElement('div'); dDiv.className='day'+(customHolidays.has(ds)?' holiday':'');
                     dDiv.innerText=d; dDiv.onclick=()=>{
                         if(customHolidays.has(ds)) customHolidays.delete(ds); else customHolidays.add(ds);
@@ -440,10 +406,10 @@
         let curr = new Date(s); let out = [];
         while(curr <= e) {
             let l = ""; if(isWorkDay(curr)) {
-                const cs = formatDateStr(curr);
-                if(cs >= formatDateStr(r.bS) && cs <= formatDateStr(r.bE)) l = "組";
-                else if(cs >= formatDateStr(r.eS) && cs <= formatDateStr(r.eE)) l = "電";
-                else if(cs >= formatDateStr(r.tS) && cs <= formatDateStr(r.tE)) l = "試";
+                const cs = formatDate(curr);
+                if(cs >= formatDate(r.bS) && cs <= formatDate(r.bE)) l = "組";
+                else if(cs >= formatDate(r.eS) && cs <= formatDate(r.eE)) l = "電";
+                else if(cs >= formatDate(r.tS) && cs <= formatDate(r.tE)) l = "試";
                 else l = "空";
             }
             out.push(l); curr.setDate(curr.getDate() + 1);
@@ -452,7 +418,7 @@
     }
 
     function copyExcelData() {
-        navigator.clipboard.writeText(computedData.dayMap.join('\t')).then(() => alert("コピーしました"));
+        navigator.clipboard.writeText(computedData.dayMap.join('\t')).then(() => alert("コピー完了"));
     }
 </script>
 </body>
