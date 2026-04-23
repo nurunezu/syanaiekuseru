@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Converge - Circular Scheduler</title>
+    <title>工程逆算スケジューラー - Converge</title>
     <style>
         :root {
             --bg: #fcfcfc;
@@ -11,15 +11,15 @@
             --border: #e5e5e5;
             --primary: #000000;
             --text-sub: #999999;
-            /* 工程カラー */
-            --color-build: #4361ee;
-            --color-elec: #f77f00;
-            --color-test: #d62828;
-            --color-empty: #eeeeee;
+            /* 工程別カラー */
+            --color-build: #4361ee; /* 組立: 青 */
+            --color-elec: #f77f00;  /* 電工: 橙 */
+            --color-test: #d62828;  /* 試運転: 赤 */
+            --color-empty: #eeeeee; /* 空き: 灰 */
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             margin: 0; background-color: var(--bg); display: flex; height: 100vh; color: #111;
             overflow: hidden;
         }
@@ -42,27 +42,27 @@
         .header-title { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 10px; }
         .header-sub { font-size: 14px; color: var(--text-sub); text-align: center; margin-bottom: 40px; }
 
-        /* 入力エリア（カード） */
+        /* 入力エリア */
         .card {
             background: white; border: 1px solid var(--border); border-radius: 4px;
             padding: 40px; max-width: 800px; margin: 0 auto 40px;
         }
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
-        .input-group label { font-size: 10px; font-weight: bold; color: var(--text-sub); text-transform: uppercase; display: block; margin-bottom: 8px; }
-        .input-group input { width: 100%; border: none; border-bottom: 1px solid #eee; font-size: 24px; font-weight: 500; outline: none; padding: 5px 0; }
+        .input-group label { font-size: 11px; font-weight: bold; color: var(--text-sub); display: block; margin-bottom: 8px; }
+        .input-group input { width: 100%; border: none; border-bottom: 1px solid #eee; font-size: 22px; font-weight: 500; outline: none; padding: 5px 0; }
         .input-group input:focus { border-bottom-color: var(--primary); }
 
         /* バッファ設定 */
         .buffer-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 30px; }
-        .buffer-group label { font-size: 9px; font-weight: bold; color: var(--text-sub); margin-bottom: 5px; display: block; }
+        .buffer-group label { font-size: 10px; font-weight: bold; color: var(--text-sub); margin-bottom: 5px; display: block; }
         .buffer-group input { background: #f9f9f9; border: 1px solid var(--border); padding: 8px; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
 
         .btn-calc { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 30px; font-size: 14px; }
 
-        /* 結果エリア */
+        /* 結果表示 */
         .result-area { display: none; max-width: 800px; margin: 0 auto; }
         
-        /* 1. テキスト詳細（上部） */
+        /* 1. 日程詳細カード */
         .details-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
         .detail-item { background: white; border: 1px solid var(--border); padding: 20px; border-left: 4px solid #eee; }
         .detail-item.build { border-left-color: var(--color-build); }
@@ -71,30 +71,34 @@
         .detail-label { font-size: 11px; font-weight: bold; color: var(--text-sub); margin-bottom: 5px; }
         .detail-val { font-size: 14px; font-weight: bold; }
 
-        /* 2. ビジュアル（円グラフ・下部） */
+        /* 2. 円グラフエリア */
         .visual-container { text-align: center; background: white; border: 1px solid var(--border); padding: 40px; border-radius: 4px; position: relative; }
         .chart-wrapper { width: 300px; height: 300px; margin: 0 auto; position: relative; }
         svg { transform: rotate(-90deg); border-radius: 50%; }
-        circle { fill: none; stroke-width: 40; transition: stroke-dasharray 0.5s ease; }
+        circle { fill: none; stroke-width: 40; transition: stroke-dasharray 0.5s ease; cursor: pointer; }
         
-        .chart-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .chart-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
         .chart-info-title { font-size: 10px; color: var(--text-sub); font-weight: bold; }
-        .chart-info-days { font-size: 24px; font-weight: bold; }
+        .chart-info-days { font-size: 28px; font-weight: bold; }
 
-        .legend { display: flex; justify-content: center; gap: 20px; margin-top: 30px; font-size: 11px; font-weight: bold; }
+        .legend { display: flex; justify-content: center; gap: 20px; margin-top: 30px; font-size: 12px; font-weight: bold; }
         .legend-item { display: flex; align-items: center; gap: 8px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
 
-        .btn-excel { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 30px; }
+        .hover-info { margin-top: 25px; font-size: 14px; font-weight: bold; color: var(--primary); min-height: 1.5em; }
 
-        /* 休日設定 */
+        .btn-excel { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 14px; }
+
+        /* 休日設定ページ */
         #page-holiday { display: none; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-        .month { background: white; border: 1px solid var(--border); padding: 10px; font-size: 11px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .month { background: white; border: 1px solid var(--border); padding: 10px; border-radius: 4px; font-size: 11px; }
+        .day { padding: 5px 0; cursor: pointer; text-align: center; border-radius: 3px; }
         .day.holiday { background: #fee2e2 !important; color: #dc2626; font-weight: bold; }
+        .sun { color: #dc2626; } .sat { color: #2563eb; }
 
         @media print {
-            .sidebar, .card, button { display: none !important; }
+            .sidebar, .card, .btn-calc, .btn-excel { display: none !important; }
             .main { padding: 0; width: 100%; }
             .result-area { display: block !important; }
         }
@@ -104,69 +108,70 @@
 
 <div class="sidebar">
     <div class="logo">Converge</div>
-    <div class="logo-sub">QUIET PRECISION</div>
+    <div class="logo-sub">工程管理ツール</div>
     <div style="margin-top: 40px;"></div>
-    <div class="nav-item active" id="nav-calc" onclick="showPage('calc')">CONVERTER</div>
-    <div class="nav-item" id="nav-holiday" onclick="showPage('holiday')">HOLIDAYS</div>
+    <div class="nav-item active" id="nav-calc" onclick="showPage('calc')">スケジュール作成</div>
+    <div class="nav-item" id="nav-holiday" onclick="showPage('holiday')">休日設定</div>
 </div>
 
 <div class="main">
+    <!-- スケジュール作成画面 -->
     <div id="page-calc">
-        <div class="header-title">Universal Scheduler</div>
-        <div class="header-sub">Seamlessly transform work hours into a clinical production plan.</div>
+        <div class="header-title">工程逆算スケジューラー</div>
+        <div class="header-sub">立会日から逆算し、最適な製造計画を可視化します</div>
 
         <div class="card">
             <div class="input-grid">
-                <div class="input-group"><label>Assembly Hours (h)</label><input type="number" id="buildHours" value="1920"></div>
-                <div class="input-group"><label>Deadline (Date)</label><input type="date" id="deadline" value="2026-10-28"></div>
-                <div class="input-group"><label>Test Run Hours (h)</label><input type="number" id="testHours" value="280"></div>
-                <div class="input-group"><label>Electrical Days (d)</label><input type="number" id="elecDays" value="1"></div>
-                <div class="input-group"><label>Assembly Workers</label><input type="number" id="buildWorkers" value="2.5" step="0.5"></div>
-                <div class="input-group"><label>Test Run Workers</label><input type="number" id="testWorkers" value="2.5" step="0.5"></div>
+                <div class="input-group"><label>組立 総工数 (h)</label><input type="number" id="buildHours" value="1920"></div>
+                <div class="input-group"><label>立会予定日</label><input type="date" id="deadline" value="2026-10-28"></div>
+                <div class="input-group"><label>試運転 総工数 (h)</label><input type="number" id="testHours" value="280"></div>
+                <div class="input-group"><label>電気工事 日数</label><input type="number" id="elecDays" value="1"></div>
+                <div class="input-group"><label>組立 対応人数</label><input type="number" id="buildWorkers" value="2.5" step="0.5"></div>
+                <div class="input-group"><label>試運転 対応人数</label><input type="number" id="testWorkers" value="2.5" step="0.5"></div>
             </div>
             
             <div class="buffer-section">
-                <div class="buffer-group"><label>Buf: Test to Deadline</label><input type="number" id="bufT2D" value="1"></div>
-                <div class="buffer-group"><label>Buf: Elec to Test</label><input type="number" id="bufE2T" value="10"></div>
-                <div class="buffer-group"><label>Buf: Build to Elec</label><input type="number" id="bufB2E" value="0"></div>
+                <div class="buffer-group"><label>試運転〜立会 空き</label><input type="number" id="bufT2D" value="1"></div>
+                <div class="buffer-group"><label>電工〜試運転 空き</label><input type="number" id="bufE2T" value="10"></div>
+                <div class="buffer-group"><label>組立〜電工 空き</label><input type="number" id="bufB2E" value="0"></div>
             </div>
-            <button class="btn-calc" onclick="calculate()">GENERATE PLAN</button>
+            <button class="btn-calc" onclick="calculate()">スケジュールを生成する</button>
         </div>
 
-        <!-- 結果表示 -->
+        <!-- 計算結果表示 -->
         <div id="result-area" class="result-area">
             <div class="details-list">
-                <div class="detail-item build"><div class="detail-label">ASSEMBLY</div><div id="txt-build" class="detail-val">-</div></div>
-                <div class="detail-item elec"><div class="detail-label">ELECTRICAL</div><div id="txt-elec" class="detail-val">-</div></div>
-                <div class="detail-item test"><div class="detail-label">TEST RUN</div><div id="txt-test" class="detail-val">-</div></div>
+                <div class="detail-item build"><div class="detail-label">組立期間</div><div id="txt-build" class="detail-val">-</div></div>
+                <div class="detail-item elec"><div class="detail-label">電気工事</div><div id="txt-elec" class="detail-val">-</div></div>
+                <div class="detail-item test"><div class="detail-label">試運転期間</div><div id="txt-test" class="detail-val">-</div></div>
             </div>
 
             <div class="visual-container">
-                <div style="font-size: 10px; font-weight: bold; color: var(--text-sub); margin-bottom: 20px;">WORKLOAD DISTRIBUTION & TIMELINE</div>
+                <div style="font-size: 11px; font-weight: bold; color: var(--text-sub); margin-bottom: 20px; letter-spacing: 1px;">工程配分およびタイムライン</div>
                 <div class="chart-wrapper">
                     <svg width="300" height="300" id="pie-chart"></svg>
                     <div class="chart-info">
-                        <div class="chart-info-title">TOTAL DAYS</div>
+                        <div class="chart-info-title">総日数</div>
                         <div class="chart-info-days" id="total-days-val">0</div>
                     </div>
                 </div>
                 <div class="legend">
-                    <div class="legend-item"><div class="dot" style="background: var(--color-build)"></div> Assembly</div>
-                    <div class="legend-item"><div class="dot" style="background: var(--color-elec)"></div> Electrical</div>
-                    <div class="legend-item"><div class="dot" style="background: var(--color-test)"></div> Test Run</div>
-                    <div class="legend-item"><div class="dot" style="background: var(--color-empty)"></div> Buffer</div>
+                    <div class="legend-item"><div class="dot" style="background: var(--color-build)"></div> 組立</div>
+                    <div class="legend-item"><div class="dot" style="background: var(--color-elec)"></div> 電工</div>
+                    <div class="legend-item"><div class="dot" style="background: var(--color-test)"></div> 試運転</div>
+                    <div class="legend-item"><div class="dot" style="background: var(--color-empty)"></div> 空き</div>
                 </div>
-                <div id="chart-hover-date" style="margin-top: 20px; font-size: 12px; font-weight: bold; color: var(--primary); min-height: 1.2em;"></div>
+                <div id="chart-hover-date" class="hover-info">グラフに触れると詳細が表示されます</div>
             </div>
 
-            <button class="btn-excel" onclick="copyExcelData()">COPY FOR EXCEL</button>
+            <button class="btn-excel" onclick="copyExcelData()">Excel貼り付け用にコピーする</button>
         </div>
     </div>
 
-    <!-- 休日設定 -->
+    <!-- 休日設定画面 -->
     <div id="page-holiday">
-        <div class="header-title">Holidays</div>
-        <div class="header-sub">Click on days to set custom company holidays.</div>
+        <div class="header-title">社内休日設定</div>
+        <div class="header-sub">日付をクリックして、独自の非稼働日を設定してください</div>
         <div id="holiday-grid" class="calendar-grid"></div>
     </div>
 </div>
@@ -188,13 +193,14 @@
     }
 
     window.onload = () => {
-        const saved = localStorage.getItem('press_holidays_pie');
+        const saved = localStorage.getItem('press_holidays_jp');
         if (saved) customHolidays = new Set(JSON.parse(saved));
         renderHolidays();
     };
 
     function isWorkDay(date) {
-        if (date.getDay() === 0 || date.getDay() === 6) return false;
+        const d = date.getDay();
+        if (d === 0 || d === 6) return false;
         return !customHolidays.has(formatDateStr(date));
     }
 
@@ -228,6 +234,7 @@
         const bufB = parseInt(document.getElementById('bufB2E').value);
         const deadline = new Date(document.getElementById('deadline').value.replace(/-/g, '/'));
 
+        // 逆算
         let tEnd = new Date(deadline);
         for(let i=0; i<bufT; i++) tEnd = getPrevWorkDay(tEnd);
         const tStart = subtractDays(tEnd, tDays);
@@ -240,25 +247,25 @@
         for(let i=0; i<bufB; i++) bEnd = getPrevWorkDay(bEnd);
         const bStart = subtractDays(bEnd, bDays);
 
-        // 表示
+        // 結果表示
         const f = d => d.toLocaleDateString('ja-JP');
-        document.getElementById('txt-build').innerText = `${f(bStart)} - ${f(bEnd)}`;
-        document.getElementById('txt-elec').innerText = `${f(eStart)} - ${f(eEnd)}`;
-        document.getElementById('txt-test').innerText = `${f(tStart)} - ${f(tEnd)}`;
+        document.getElementById('txt-build').innerText = `${f(bStart)} 〜 ${f(bEnd)}`;
+        document.getElementById('txt-elec').innerText = `${f(eStart)} 〜 ${f(eEnd)}`;
+        document.getElementById('txt-test').innerText = `${f(tStart)} 〜 ${f(tEnd)}`;
         
         const totalDiff = Math.ceil((deadline - bStart) / (1000*60*60*24));
         document.getElementById('total-days-val').innerText = totalDiff;
 
         document.getElementById('result-area').style.display = 'block';
 
-        // 円グラフ作成
+        // グラフ描画データ
         drawPieChart([
             { name: '組立', days: bDays, color: 'var(--color-build)', range: `${f(bStart)} 〜 ${f(bEnd)}` },
-            { name: '空', days: bufB, color: 'var(--color-empty)', range: `バッファ` },
+            { name: '空き', days: bufB, color: 'var(--color-empty)', range: `バッファ期間` },
             { name: '電工', days: eD, color: 'var(--color-elec)', range: `${f(eStart)} 〜 ${f(eEnd)}` },
-            { name: '空', days: bufE, color: 'var(--color-empty)', range: `バッファ` },
-            { name: '試運', days: tDays, color: 'var(--color-test)', range: `${f(tStart)} 〜 ${f(tEnd)}` },
-            { name: '空', days: bufT, color: 'var(--color-empty)', range: `バッファ` }
+            { name: '空き', days: bufE, color: 'var(--color-empty)', range: `バッファ期間` },
+            { name: '試運転', days: tDays, color: 'var(--color-test)', range: `${f(tStart)} 〜 ${f(tEnd)}` },
+            { name: '空き', days: bufT, color: 'var(--color-empty)', range: `バッファ期間` }
         ]);
 
         generateExcelData(bStart, deadline, {bS:bStart, bE:bEnd, eS:eStart, eE:eEnd, tS:tStart, tE:tEnd});
@@ -283,8 +290,9 @@
             circle.setAttribute("stroke-dasharray", `${ratio * C} ${C}`);
             circle.setAttribute("stroke-dashoffset", -offset * C);
             
+            // ホバーイベント
             circle.onmouseover = () => document.getElementById('chart-hover-date').innerText = `${p.name}: ${p.range}`;
-            circle.onmouseout = () => document.getElementById('chart-hover-date').innerText = '';
+            circle.onmouseout = () => document.getElementById('chart-hover-date').innerText = 'グラフに触れると詳細が表示されます';
 
             svg.appendChild(circle);
             offset += ratio;
@@ -298,19 +306,25 @@
             for(let m=0; m<12; m++){
                 const div = document.createElement('div');
                 div.className = 'month';
-                div.innerHTML = `<div style="text-align:center; font-weight:bold; margin-bottom:5px;">${y}/${m+1}</div>`;
+                div.innerHTML = `<div style="text-align:center; font-weight:bold; margin-bottom:8px;">${y}年 ${m+1}月</div>`;
                 const days = document.createElement('div');
                 days.style.display = 'grid'; days.style.gridTemplateColumns = 'repeat(7, 1fr)';
+                
+                const first = new Date(y, m, 1);
                 const last = new Date(y, m+1, 0).getDate();
+                for(let i=0; i<first.getDay(); i++) days.appendChild(document.createElement('div'));
+                
                 for(let d=1; d<=last; d++){
                     const dStr = formatDateStr(new Date(y, m, d));
                     const dDiv = document.createElement('div');
                     dDiv.className = 'day' + (customHolidays.has(dStr) ? ' holiday' : '');
+                    if (new Date(y, m, d).getDay() === 0) dDiv.classList.add('sun');
+                    if (new Date(y, m, d).getDay() === 6) dDiv.classList.add('sat');
                     dDiv.innerText = d;
                     dDiv.onclick = () => {
                         if(customHolidays.has(dStr)) customHolidays.delete(dStr);
                         else customHolidays.add(dStr);
-                        localStorage.setItem('press_holidays_pie', JSON.stringify([...customHolidays]));
+                        localStorage.setItem('press_holidays_jp', JSON.stringify([...customHolidays]));
                         renderHolidays();
                     };
                     days.appendChild(dDiv);
@@ -340,7 +354,7 @@
     }
 
     function copyExcelData() {
-        navigator.clipboard.writeText(computedData.dayMap.join('\t')).then(() => alert("Copied!"));
+        navigator.clipboard.writeText(computedData.dayMap.join('\t')).then(() => alert("Excel貼り付け用データをコピーしました！"));
     }
 </script>
 </body>
