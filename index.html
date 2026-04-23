@@ -3,218 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Converge - Fluent Scheduler</title>
+    <title>Converge - HID Project Manager</title>
     <style>
         :root {
-            /* Fluent 2 Color Palette */
-            --f-bg: #f3f3f3;
-            --f-card: #ffffff;
-            --f-sidebar: rgba(255, 255, 255, 0.7);
-            --f-accent: #0078d4; /* Fluent Blue */
-            --f-accent-hover: #005a9e;
-            --f-text: #242424;
-            --f-text-sec: #616161;
-            --f-border: #e0e0e0;
-            --f-radius: 8px;
-            --f-shadow: 0 4px 12px rgba(0,0,0,0.08);
-
-            /* Process Colors */
-            --color-build: #0078d4; /* Assembly */
-            --color-elec: #d83b01;  /* Electrical */
-            --color-test: #c50f1f;  /* Test Run */
-            --color-empty: rgba(161, 159, 157, 0.2); /* Buffer */
+            /* Apple System Colors */
+            --bg-color: #f5f5f7;
+            --sidebar-color: rgba(255, 255, 255, 0.7);
+            --card-color: #ffffff;
+            --text-main: #1d1d1f;
+            --text-sub: #86868b;
+            --accent-blue: #0071e3;
+            --accent-green: #34c759;
+            --border-color: #d2d2d7;
+            
+            /* Engineering Colors */
+            --build-color: #007aff;
+            --elec-color: #ff9500;
+            --test-color: #ff3b30;
+            --empty-color: #e5e5ea;
         }
 
         body {
-            font-family: 'Segoe UI Variable Display', 'Segoe UI', 'Meiryo UI', sans-serif;
-            margin: 0; background-color: var(--f-bg); display: flex; height: 100vh; color: var(--f-text); overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Hiragino Sans", sans-serif;
+            margin: 0; background-color: var(--bg-color); color: var(--text-main);
+            display: flex; height: 100vh; overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* サイドバー - Acrylic Effect */
+        /* Sidebar - Glassmorphism */
         .sidebar {
-            width: 240px; background: var(--f-sidebar); backdrop-filter: blur(20px);
-            border-right: 1px solid var(--f-border); padding: 32px 16px; display: flex; flex-direction: column; flex-shrink: 0;
+            width: 240px; background: var(--sidebar-color); backdrop-filter: blur(30px);
+            border-right: 1px solid var(--border-color); padding: 48px 24px;
+            display: flex; flex-direction: column; flex-shrink: 0;
         }
-        .brand { padding: 0 16px; margin-bottom: 32px; }
-        .logo { font-size: 20px; font-weight: 700; color: var(--f-text); letter-spacing: -0.5px; }
-        .logo-sub { font-size: 11px; color: var(--f-text-sec); text-transform: uppercase; letter-spacing: 1.5px; }
-
+        .sidebar-logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 48px; }
+        .nav-group { display: flex; flex-direction: column; gap: 8px; }
         .nav-item {
-            display: flex; align-items: center; padding: 12px 16px; border-radius: var(--f-radius);
-            font-size: 14px; font-weight: 500; color: var(--f-text-sec); cursor: pointer;
-            transition: all 0.2s ease; margin-bottom: 4px;
+            padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 500;
+            color: var(--text-sub); cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .nav-item:hover { background: rgba(0,0,0,0.04); color: var(--f-text); }
-        .nav-item.active { background: #fff; box-shadow: var(--f-shadow); color: var(--f-accent); font-weight: 600; }
+        .nav-item:hover { background: rgba(0,0,0,0.05); color: var(--text-main); }
+        .nav-item.active { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: var(--accent-blue); }
 
-        /* メインコンテンツ */
-        .main { flex: 1; padding: 32px 48px; overflow-y: auto; }
-        .page-header { margin-bottom: 24px; }
-        .page-header h1 { font-size: 28px; font-weight: 700; margin: 0; }
-        .page-header p { font-size: 14px; color: var(--f-text-sec); margin: 4px 0 0 0; }
+        /* Main Content */
+        .main { flex: 1; padding: 40px 60px; overflow-y: auto; scroll-behavior: smooth; }
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-size: 34px; font-weight: 700; letter-spacing: -1px; margin: 0; }
+        .page-header p { font-size: 17px; color: var(--text-sub); margin-top: 8px; }
 
-        /* Fluent Card */
+        /* Apple Style Cards */
         .card {
-            background: var(--f-card); border: 1px solid var(--f-border); border-radius: 12px;
-            padding: 24px; box-shadow: var(--f-shadow); margin-bottom: 24px;
+            background: var(--card-color); border-radius: 20px; padding: 32px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 24px;
         }
-        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        .card-header { font-size: 19px; font-weight: 600; margin-bottom: 24px; }
 
         /* Form Layout */
-        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-        .input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-
-        .f-field label { font-size: 12px; font-weight: 600; color: var(--f-text-sec); display: block; margin-bottom: 6px; }
-        .f-input {
-            width: 100%; border: 1px solid var(--f-border); border-radius: 4px; padding: 10px 12px;
-            font-size: 15px; outline: none; transition: border-color 0.2s; box-sizing: border-box;
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .form-item { display: flex; flex-direction: column; gap: 8px; }
+        .form-item label { font-size: 13px; font-weight: 600; color: var(--text-sub); }
+        
+        .input-apple {
+            background: #f5f5f7; border: 1px solid transparent; border-radius: 12px;
+            padding: 14px 16px; font-size: 16px; font-weight: 500; transition: all 0.2s ease;
         }
-        .f-input:focus { border-color: var(--f-accent); border-width: 2px; padding: 9px 11px; }
+        .input-apple:focus { background: #fff; border-color: var(--accent-blue); outline: none; box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+
+        /* Layout Grid for Results */
+        .result-layout { display: grid; grid-template-columns: 340px 1fr; gap: 40px; margin-top: 40px; display: none; }
+
+        /* Pie/Donut Chart Fix */
+        .chart-box { text-align: center; }
+        .chart-svg-container { position: relative; width: 280px; height: 280px; margin: 0 auto; }
+        svg { transform: rotate(-90deg); }
+        .donut-segment { fill: none; stroke-width: 44; transition: stroke-dasharray 0.6s ease; stroke-linecap: round; }
+        .chart-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            display: flex; flex-direction: column; align-items: center; pointer-events: none;
+        }
+        .chart-overlay .num { font-size: 40px; font-weight: 700; color: var(--text-main); }
+        .chart-overlay .unit { font-size: 12px; font-weight: 700; color: var(--text-sub); letter-spacing: 1px; }
+
+        /* Detail List */
+        .detail-list { display: flex; flex-direction: column; gap: 16px; justify-content: center; }
+        .detail-row {
+            padding: 20px; background: #fafafa; border-radius: 16px;
+            border-left: 6px solid var(--empty-color);
+        }
+        .detail-row.build { border-left-color: var(--build-color); }
+        .detail-row.elec { border-left-color: var(--elec-color); }
+        .detail-row.test { border-left-color: var(--test-color); }
+        .detail-title { font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; }
+        .detail-val { font-size: 18px; font-weight: 600; }
 
         /* Buttons */
-        .btn { border: none; border-radius: 4px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 14px; }
-        .btn-primary { background: var(--f-accent); color: white; padding: 12px 24px; }
-        .btn-primary:hover { background: var(--f-accent-hover); box-shadow: 0 4px 8px rgba(0,120,212,0.3); }
-        .btn-success { background: #107c10; color: white; padding: 12px 24px; width: 100%; }
-        .btn-secondary { background: #f3f3f3; color: #242424; padding: 8px 16px; border: 1px solid #e0e0e0; }
+        .btn-apple {
+            border: none; border-radius: 14px; font-size: 16px; font-weight: 600;
+            padding: 16px 24px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .btn-primary { background: var(--accent-blue); color: #fff; width: 100%; margin-top: 24px; }
+        .btn-primary:hover { background: #0077ed; transform: scale(1.01); }
+        .btn-excel { background: var(--accent-green); color: #fff; width: 100%; margin-top: 24px; }
+        .btn-save { background: rgba(0,0,0,0.05); color: var(--text-main); margin-top: 12px; width: 100%; }
 
-        /* Results Display Grid */
-        .result-layout { display: grid; grid-template-columns: 320px 1fr; gap: 40px; margin-top: 32px; display: none; }
-        .chart-section { text-align: center; }
-        .chart-container { position: relative; width: 240px; height: 240px; margin: 0 auto; }
-        .chart-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
-        .chart-days { font-size: 36px; font-weight: 700; color: var(--f-accent); }
-
-        .details-section { display: flex; flex-direction: column; gap: 16px; }
-        .detail-item { padding: 16px; border-radius: 8px; border-left: 4px solid var(--f-border); background: #f9f9f9; }
-        .detail-item.build { border-left-color: var(--color-build); }
-        .detail-item.elec { border-left-color: var(--color-elec); }
-        .detail-item.test { border-left-color: var(--color-test); }
-        .detail-header { font-size: 12px; font-weight: 600; color: var(--f-text-sec); margin-bottom: 4px; }
-        .detail-val { font-size: 18px; font-weight: 700; }
-
-        /* Master Board - Gantt View */
-        .board-wrapper { overflow-x: auto; border-radius: 12px; border: 1px solid var(--f-border); background: var(--f-card); }
-        .board-axis { display: flex; background: #fafafa; border-bottom: 1px solid var(--f-border); height: 40px; align-items: center; font-size: 11px; font-weight: 600; color: var(--f-text-sec); }
-        .board-row { display: flex; border-bottom: 1px solid var(--f-border); height: 80px; align-items: center; transition: background 0.2s; cursor: pointer; }
-        .board-row:hover { background: #fcfcfc; }
-        .row-meta { width: 220px; padding: 16px; border-right: 1px solid var(--f-border); flex-shrink: 0; background: white; }
-        .row-gantt { flex: 1; position: relative; height: 100%; display: flex; align-items: center; padding: 0 16px; min-width: 800px; }
+        /* History Master Board */
+        .board-container { background: #fff; border-radius: 24px; border: 1px solid var(--border-color); overflow: hidden; }
+        .board-axis { display: flex; background: rgba(0,0,0,0.02); height: 44px; align-items: center; font-size: 11px; font-weight: 700; color: var(--text-sub); }
+        .board-row { display: flex; border-top: 1px solid #f2f2f2; height: 90px; align-items: center; transition: background 0.2s; cursor: pointer; }
+        .board-row:hover { background: #f9f9fb; }
+        .row-info { width: 200px; padding: 20px; border-right: 1px solid #f2f2f2; flex-shrink: 0; }
+        .row-visual { flex: 1; position: relative; height: 100%; padding: 0 20px; display: flex; align-items: center; min-width: 800px; }
         
-        .gantt-bar { position: absolute; height: 36px; display: flex; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        .gantt-block { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-size: 9px; font-weight: 700; white-space: nowrap; border-right: 1px solid rgba(255,255,255,0.2); }
-        .gantt-date { font-size: 8px; opacity: 0.9; }
+        .gantt-track { position: absolute; height: 40px; display: flex; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .gantt-seg { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.15); }
+        .gantt-date { font-size: 8px; opacity: 0.8; margin-top: 2px; }
         
-        .bg-build { background: var(--color-build); }
-        .bg-elec { background: var(--color-elec); }
-        .bg-test { background: var(--color-test); }
-        .bg-empty { background: var(--color-empty); color: #888; }
+        .bg-build { background: var(--build-color); }
+        .bg-elec { background: var(--elec-color); }
+        .bg-test { background: var(--test-color); }
+        .bg-empty { background: rgba(0,0,0,0.04); color: #888; }
 
-        /* Calendar */
-        .cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px; }
-        .cal-month { background: white; border: 1px solid var(--f-border); padding: 16px; border-radius: 8px; }
-        .day { padding: 6px; cursor: pointer; text-align: center; border-radius: 4px; font-size: 13px; }
-        .day.holiday { background: #fee2e2 !important; color: #dc2626; font-weight: bold; }
+        /* Holidays */
+        .cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
+        .day.holiday { background: #ff3b30 !important; color: #fff; font-weight: 700; }
     </style>
 </head>
 <body>
 
-<nav class="sidebar">
-    <div class="brand">
-        <div class="logo">Converge</div>
-        <div class="logo-sub">Project Master</div>
+<aside class="sidebar">
+    <div class="sidebar-logo">Converge</div>
+    <div class="nav-group">
+        <div class="nav-item active" id="nav-calc" onclick="showPage('calc')">新規プロジェクト</div>
+        <div class="nav-item" id="nav-history" onclick="showPage('history')">全体スケジュール</div>
+        <div class="nav-item" id="nav-holiday" onclick="showPage('holiday')">休日設定</div>
     </div>
-    <div class="nav-item active" id="nav-calc" onclick="showPage('calc')">新規プロジェクト</div>
-    <div class="nav-item" id="nav-history" onclick="showPage('history')">全体スケジュール</div>
-    <div class="nav-item" id="nav-holiday" onclick="showPage('holiday')">休日カレンダー</div>
-</nav>
+</aside>
 
 <main class="main">
-    <!-- 入力・計算画面 -->
+    <!-- 新規作成ページ -->
     <div id="page-calc">
-        <div class="page-header">
-            <h1>新規プロジェクト</h1>
-            <p>条件を入力して、最適な製造スケジュールを生成します。</p>
-        </div>
+        <header class="page-header">
+            <h1>Scheduler</h1>
+            <p>工数から製造スケジュールを精密に逆算します。</p>
+        </header>
 
-        <div class="card">
-            <div class="card-title">基本情報の定義</div>
-            <div class="input-row">
-                <div class="f-field">
-                    <label>企業名（顧客名）</label>
-                    <input type="text" id="compName" class="f-input" placeholder="例: 〇〇自動車製作所">
-                </div>
-                <div class="f-field">
-                    <label>工場名（案件名）</label>
-                    <input type="text" id="factName" class="f-input" placeholder="例: プレス3号機更新">
-                </div>
+        <section class="card">
+            <div class="card-header">案件定義</div>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 32px;">
+                <div class="form-item"><label>企業名（顧客）</label><input type="text" id="compName" class="input-apple" placeholder="Company Name"></div>
+                <div class="form-item"><label>工場名（案件）</label><input type="text" id="factName" class="input-apple" placeholder="Project Name"></div>
             </div>
             
-            <div class="input-grid">
-                <div class="f-field"><label>立会予定日</label><input type="date" id="deadline" class="f-input" value="2026-10-28"></div>
-                <div class="f-field"><label>組立：総工数 (h)</label><input type="number" id="buildHours" class="f-input" value="1920"></div>
-                <div class="f-field"><label>組立：人数</label><input type="number" id="buildWorkers" class="f-input" value="2.5" step="0.5"></div>
-                <div class="f-field"><label>試運転：工数 (h)</label><input type="number" id="testHours" class="f-input" value="280"></div>
-                <div class="f-field"><label>試運転：人数</label><input type="number" id="testWorkers" class="f-input" value="2.5" step="0.5"></div>
-                <div class="f-field"><label>電気工事日数</label><input type="number" id="elecDays" class="f-input" value="1"></div>
+            <div class="card-header" style="border-top: 1px solid #f2f2f2; padding-top: 24px;">計算条件</div>
+            <div class="form-grid">
+                <div class="form-item"><label>立会予定日</label><input type="date" id="deadline" class="input-apple"></div>
+                <div class="form-item"><label>組立工数 (h)</label><input type="number" id="buildHours" class="input-apple" value="1920"></div>
+                <div class="form-item"><label>組立人数</label><input type="number" id="buildWorkers" class="input-apple" value="2.5" step="0.5"></div>
+                <div class="form-item"><label>試運転工数 (h)</label><input type="number" id="testHours" class="input-apple" value="280"></div>
+                <div class="form-item"><label>試運転人数</label><input type="number" id="testWorkers" class="input-apple" value="2.5" step="0.5"></div>
+                <div class="form-item"><label>電工日数</label><input type="number" id="elecDays" class="input-apple" value="1"></div>
             </div>
 
-            <div class="input-grid" style="margin-top:24px; padding:20px; background:#f9f9f9; border-radius:8px;">
-                <div class="f-field"><label>バッファ: 試運転〜立会</label><input type="number" id="bufT2D" class="f-input" value="1"></div>
-                <div class="f-field"><label>バッファ: 電工〜試運転</label><input type="number" id="bufE2T" class="f-input" value="10"></div>
-                <div class="f-field"><label>バッファ: 組立〜電工</label><input type="number" id="bufB2E" class="f-input" value="0"></div>
+            <div class="form-grid" style="margin-top: 24px; padding: 24px; background: #fbfbfd; border-radius: 16px;">
+                <div class="form-item"><label>バッファ: 試運転〜立会</label><input type="number" id="bufT2D" class="input-apple" value="1"></div>
+                <div class="form-item"><label>バッファ: 電工〜試運転</label><input type="number" id="bufE2T" class="input-apple" value="10"></div>
+                <div class="form-item"><label>バッファ: 組立〜電工</label><input type="number" id="bufB2E" class="input-apple" value="0"></div>
             </div>
             
-            <button class="btn btn-primary" style="margin-top:24px; width:100%;" onclick="calculate()">スケジュールを生成</button>
-        </div>
+            <button class="btn-apple btn-primary" onclick="calculate()">スケジュール生成</button>
+        </section>
 
         <!-- 結果表示 -->
         <div id="result-layout" class="result-layout">
-            <div class="chart-section">
+            <div class="chart-box">
                 <div class="card">
-                    <div class="card-title">工程比率</div>
-                    <div class="chart-container">
-                        <svg width="240" height="240" id="pie-chart"></svg>
-                        <div class="chart-label">
-                            <div class="chart-days" id="total-days-val">0</div>
-                            <div style="font-size:10px; color:var(--f-text-sec); font-weight:700;">TOTAL DAYS</div>
+                    <div class="chart-svg-container">
+                        <svg width="280" height="280" id="pie-chart"></svg>
+                        <div class="chart-overlay">
+                            <span class="num" id="total-days-val">0</span>
+                            <span class="unit">TOTAL DAYS</span>
                         </div>
                     </div>
-                    <div id="chart-hover-text" style="font-size:12px; font-weight:bold; margin-top:16px; color:var(--f-accent); min-height:1.5em;"></div>
+                    <div id="chart-hover-text" style="font-size:14px; font-weight:700; margin-top:24px; color:var(--accent-blue); min-height:1.5em;"></div>
                 </div>
             </div>
-            <div class="details-section">
-                <div class="card" style="height:100%;">
-                    <div class="card-title">日程詳細</div>
-                    <div class="detail-item build"><div class="detail-header">組立工程期間</div><div id="txt-build" class="detail-val">-</div></div>
-                    <div class="detail-item elec"><div class="detail-header">電気工事期間</div><div id="txt-elec" class="detail-val">-</div></div>
-                    <div class="detail-item test"><div class="detail-header">試運転工程期間</div><div id="txt-test" class="detail-val">-</div></div>
+            <div class="detail-list">
+                <div class="card" style="height:100%; display:flex; flex-direction:column; justify-content:center;">
+                    <div class="detail-row build"><div class="detail-title">組立工程</div><div id="txt-build" class="detail-val">-</div></div>
+                    <div class="detail-row elec"><div class="detail-title">電気工事</div><div id="txt-elec" class="detail-val">-</div></div>
+                    <div class="detail-row test"><div class="detail-title">試運転工程</div><div id="txt-test" class="detail-val">-</div></div>
                     
-                    <button class="btn btn-success" style="margin-top:24px;" onclick="copyExcelData()">Excel貼り付け用にコピー</button>
-                    <button class="btn btn-secondary" style="margin-top:12px; width:100%;" onclick="saveProject()">この計画をマスターボードに保存</button>
+                    <button class="btn-apple btn-excel" onclick="copyExcelData()" style="margin-top: auto;">Excel貼り付け用にコピー</button>
+                    <button class="btn-apple btn-save" onclick="saveProject()">この計画をマスターボードに保存</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 全体スケジュール画面 -->
+    <!-- 全体スケジュールページ -->
     <div id="page-history" style="display:none">
-        <div class="page-header">
-            <h1>全体スケジュール</h1>
-            <p>すべての案件の重なりを日単位で俯瞰・管理します。</p>
-        </div>
-        <div class="board-wrapper">
+        <header class="page-header">
+            <h1>Master Board</h1>
+            <p>全案件の稼働状況を俯瞰します。</p>
+        </header>
+        <div class="board-container">
             <div id="board-axis" class="board-axis"></div>
             <div id="history-list"></div>
         </div>
     </div>
 
-    <!-- 休日設定 -->
+    <!-- 休日設定ページ -->
     <div id="page-holiday" style="display:none">
-        <div class="page-header">
-            <h1>休日設定</h1>
-            <p>社内の特別休日や祝日を指定して計算に反映させます。</p>
-        </div>
+        <header class="page-header">
+            <h1>Holidays</h1>
+            <p>社内カレンダーを管理します。</p>
+        </header>
         <div id="holiday-grid" class="cal-grid"></div>
     </div>
 </main>
@@ -242,8 +245,9 @@
     window.onload = () => {
         const h = localStorage.getItem('press_holidays');
         if (h) customHolidays = new Set(JSON.parse(h));
-        const p = localStorage.getItem('press_master_fluent');
+        const p = localStorage.getItem('press_master_v2');
         if (p) savedProjects = JSON.parse(p);
+        document.getElementById('deadline').value = "2026-10-28";
     };
 
     function isWorkDay(date) {
@@ -305,14 +309,16 @@
         document.getElementById('txt-test').innerText = `${f(res.tStart)} 〜 ${f(res.tEnd)}`;
         document.getElementById('total-days-val').innerText = Math.ceil((res.deadline - res.bStart) / (1000*60*60*24));
         document.getElementById('result-layout').style.display = 'grid';
+        
         drawPieChart([
-            { name: '組立', days: res.bDays, color: 'var(--color-build)', range: `${f(res.bStart)}-${f(res.bEnd)}` },
-            { name: '空き', days: source.bufB, color: 'var(--color-empty)', range: `バッファ` },
-            { name: '電工', days: res.eD, color: 'var(--color-elec)', range: `${f(res.eStart)}-${f(res.eEnd)}` },
-            { name: '空き', days: source.bufE, color: 'var(--color-empty)', range: `バッファ` },
-            { name: '試運', days: res.tDays, color: 'var(--color-test)', range: `${f(res.tStart)}-${f(res.tEnd)}` },
-            { name: '空き', days: source.bufT, color: 'var(--color-empty)', range: `バッファ` }
+            { name: '組立', days: res.bDays, color: 'var(--build-color)', range: `${f(res.bStart)}-${f(res.bEnd)}` },
+            { name: '空き', days: source.bufB, color: 'var(--empty-color)', range: `バッファ` },
+            { name: '電工', days: res.eD, color: 'var(--elec-color)', range: `${f(res.eStart)}-${f(res.eEnd)}` },
+            { name: '空き', days: source.bufE, color: 'var(--empty-color)', range: `バッファ` },
+            { name: '試運', days: res.tDays, color: 'var(--test-color)', range: `${f(res.tStart)}-${f(res.tEnd)}` },
+            { name: '空き', days: source.bufT, color: 'var(--empty-color)', range: `バッファ` }
         ]);
+        
         generateExcelData(res.bStart, res.deadline, {bS:res.bStart, bE:res.bEnd, eS:res.eStart, eE:res.eEnd, tS:res.tStart, tE:res.tEnd});
         computedData.source = source;
     }
@@ -320,43 +326,47 @@
     function drawPieChart(phases) {
         const svg = document.getElementById('pie-chart'); svg.innerHTML = '';
         const total = phases.reduce((s, p) => s + p.days, 0);
-        let offset = 0; const R = 100; const C = 2 * Math.PI * R;
+        let offset = 0; const R = 110; const C = 2 * Math.PI * R;
+        
         phases.forEach(p => {
             if (p.days <= 0) return;
+            const ratio = p.days / total;
             const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", 120); circle.setAttribute("cy", 120); circle.setAttribute("r", R);
+            circle.setAttribute("class", "donut-segment");
+            circle.setAttribute("cx", 140); circle.setAttribute("cy", 140); circle.setAttribute("r", R);
             circle.setAttribute("stroke", p.color);
-            circle.setAttribute("stroke-dasharray", `${(p.days/total)*C} ${C}`);
+            circle.setAttribute("stroke-dasharray", `${ratio * C} ${C}`);
             circle.setAttribute("stroke-dashoffset", -offset * C);
             circle.onmouseover = () => document.getElementById('chart-hover-text').innerText = `${p.name}: ${p.range}`;
             circle.onmouseout = () => document.getElementById('chart-hover-text').innerText = '';
             svg.appendChild(circle);
-            offset += (p.days/total);
+            offset += ratio;
         });
     }
 
     function saveProject() {
         if(!computedData.source.comp || !computedData.source.fact) return alert("案件情報を入力してください");
         savedProjects.unshift({ id: Date.now(), ...computedData.source });
-        localStorage.setItem('press_master_fluent', JSON.stringify(savedProjects));
-        alert("全体スケジュールに保存しました");
+        localStorage.setItem('press_master_v2', JSON.stringify(savedProjects));
+        alert("マスターボードに保存しました");
     }
 
     function renderMasterBoard() {
         const list = document.getElementById('history-list'); const axis = document.getElementById('board-axis');
-        list.innerHTML = ''; if (savedProjects.length === 0) return list.innerHTML = '<p style="padding:24px;">保存データなし</p>';
+        list.innerHTML = ''; if (savedProjects.length === 0) return list.innerHTML = '<p style="padding:48px; color:#888;">保存データがありません</p>';
         const analyzed = savedProjects.map(p => ({ ...p, res: runLogic(p) }));
         const allDates = analyzed.flatMap(p => [p.res.bStart, p.res.deadline]);
         const minD = new Date(Math.min(...allDates)); const maxD = new Date(Math.max(...allDates));
         const totalDuration = maxD - minD;
-        axis.innerHTML = '<div style="width:220px; flex-shrink:0; padding-left:16px;">案件 / 工場</div>';
+        
+        axis.innerHTML = '<div style="width:200px; padding-left:20px;">PROJECT / CLIENT</div>';
         let curr = new Date(minD.getFullYear(), minD.getMonth(), 1);
         while(curr <= maxD) {
             const item = document.createElement('div'); item.style.flex = "1";
             item.innerText = `${curr.getFullYear()}/${curr.getMonth()+1}`; axis.appendChild(item);
-            curr.setMonth(curr.getMonth() + 1);
+            curr.setMonth(curr.setMonth() + 1);
         }
-        const f = d => `${d.getMonth()+1}/${d.getDate()}`;
+        
         analyzed.forEach(p => {
             const row = document.createElement('div'); row.className = 'board-row';
             row.onclick = () => {
@@ -380,15 +390,16 @@
             const wT = ((p.res.tEnd - p.res.tStart) / totalDuration) * 100;
             const gBE = ((p.res.eStart - p.res.bEnd) / totalDuration) * 100;
             const gET = ((p.res.tStart - p.res.eEnd) / totalDuration) * 100;
+            const f = d => `${d.getMonth()+1}/${d.getDate()}`;
             row.innerHTML = `
-                <div class="row-meta"><div style="font-weight:700; font-size:13px;">${p.comp}</div><div style="font-size:11px; color:var(--f-text-sec);">${p.fact}</div></div>
-                <div class="row-gantt">
-                    <div class="gantt-bar" style="left:${left}%; width:${100-left}%;">
-                        <div class="gantt-block bg-build" style="width:${(wB/(100-left))*100}%">組立<span class="gantt-date">${f(p.res.bStart)}-${f(p.res.bEnd)}</span></div>
-                        <div class="gantt-block bg-empty" style="width:${(gBE/(100-left))*100}%"></div>
-                        <div class="gantt-block bg-elec" style="width:${(wE/(100-left))*100}%">電工<span class="gantt-date">${f(p.res.eStart)}</span></div>
-                        <div class="gantt-block bg-empty" style="width:${(gET/(100-left))*100}%"></div>
-                        <div class="gantt-block bg-test" style="width:${(wT/(100-left))*100}%">試運転<span class="gantt-date">${f(p.res.tStart)}-${f(p.res.tEnd)}</span></div>
+                <div class="row-info"><div style="font-weight:700; font-size:14px;">${p.comp}</div><div style="font-size:11px; color:var(--text-sub);">${p.fact}</div></div>
+                <div class="row-visual">
+                    <div class="gantt-track" style="left:${left}%; width:${100-left}%;">
+                        <div class="gantt-seg bg-build" style="width:${(wB/(100-left))*100}%">組立<span class="gantt-date">${f(p.res.bStart)}-${f(p.res.bEnd)}</span></div>
+                        <div class="gantt-seg bg-empty" style="width:${(gBE/(100-left))*100}%"></div>
+                        <div class="gantt-seg bg-elec" style="width:${(wE/(100-left))*100}%">電工<span class="gantt-date">${f(p.res.eStart)}</span></div>
+                        <div class="gantt-seg bg-empty" style="width:${(gET/(100-left))*100}%"></div>
+                        <div class="gantt-seg bg-test" style="width:${(wT/(100-left))*100}%">試運転<span class="gantt-date">${f(p.res.tStart)}-${f(p.res.tEnd)}</span></div>
                     </div>
                 </div>`;
             list.appendChild(row);
@@ -399,8 +410,8 @@
         const grid = document.getElementById('holiday-grid'); grid.innerHTML = '';
         [2026, 2027].forEach(y => {
             for(let m=0; m<12; m++){
-                const div = document.createElement('div'); div.className='cal-month';
-                div.innerHTML=`<div style="text-align:center;font-weight:700;margin-bottom:8px;">${y}年 ${m+1}月</div>`;
+                const div = document.createElement('div'); div.className='card';
+                div.innerHTML=`<div style="text-align:center;font-weight:700;margin-bottom:12px;">${y}年 ${m+1}月</div>`;
                 const days = document.createElement('div'); days.style.display='grid'; days.style.gridTemplateColumns='repeat(7, 1fr)';
                 const first = new Date(y, m, 1);
                 for(let i=0; i<first.getDay(); i++) days.appendChild(document.createElement('div'));
@@ -435,7 +446,7 @@
     }
 
     function copyExcelData() {
-        navigator.clipboard.writeText(computedData.dayMap.join('\t')).then(() => alert("Excelコピー完了"));
+        navigator.clipboard.writeText(computedData.dayMap.join('\t')).then(() => alert("コピー完了しました。"));
     }
 </script>
 </body>
