@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Converge OS - Ultimate Dashboard DB-B1.2</title>
+    <title>Converge OS - Ultimate Dashboard DB-B1.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,11 +29,9 @@
             display: flex; height: 100vh; overflow: hidden;
         }
 
-        /* --- Typography: En/Ja Dual Labels (Fixed & Enhanced) --- */
+        /* --- Typography: En/Ja Dual Labels --- */
         .label-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
-        /* 英語は大きく太く */
         .en-text { font-size: 16px; font-weight: 900; color: var(--text-hero); letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
-        /* 日本語は小さく控えめに */
         .ja-text { font-size: 11px; font-weight: 600; color: var(--text-sub); font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif; letter-spacing: 0.5px; line-height: 1; }
 
         /* --- Sidebar Navigation --- */
@@ -53,7 +51,7 @@
         .nav-item .ja-text { font-size: 9px; color: #5a6b7c; opacity: 0.6; }
         .nav-item.active .en-text, .nav-item.active .ja-text { color: var(--accent-orange); opacity: 1; }
 
-        /* --- Header (Centered Title + Info HUD) --- */
+        /* --- Header --- */
         .dashboard { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
         
         .header {
@@ -79,13 +77,31 @@
         #page-calc.active { display: grid; grid-template-columns: 440px 1fr; }
         #page-history.active, #page-holiday.active { display: flex; flex-direction: column; }
 
-        /* --- Left: Config Panel --- */
-        .config-panel { background: #0d1117; border-right: 1px solid var(--border); padding: 32px; overflow-y: auto; }
+        /* --- Left: Config Panel (Decorated & Resized) --- */
+        .config-panel { 
+            /* 少しグラデーションを入れて立体感を出す */
+            background: linear-gradient(180deg, #0d1117 0%, #0a0d12 100%); 
+            border-right: 1px solid var(--border); padding: 32px; overflow-y: auto; 
+        }
         .section-title { margin: 32px 0 24px 0; }
         .section-title:first-child { margin-top: 0; }
-        .section-line { height: 1px; background: var(--border); margin-top: 8px; width: 100%; }
+        .section-title-top { display: flex; align-items: center; width: 100%; margin-bottom: 4px; }
+        
+        /* タイトル横のオレンジのアクセントバー */
+        .section-title-top::before {
+            content: ''; display: inline-block; width: 4px; height: 18px;
+            background: var(--accent-orange); border-radius: 2px;
+            margin-right: 12px; box-shadow: 0 0 8px var(--accent-glow);
+        }
+        
+        /* 区切り線をオレンジのグラデーションに */
+        .section-line { 
+            height: 1px; 
+            background: linear-gradient(90deg, rgba(255,123,0,0.4), transparent); 
+            margin-top: 8px; width: 100%; 
+        }
 
-        /* Form Labels adjustment */
+        /* フォームのラベルフォントサイズ（B1.2の迫力を維持） */
         .param-item .en-text { font-size: 14px; }
         .param-item .ja-text { font-size: 10px; }
 
@@ -95,8 +111,16 @@
         
         .input-wrapper { position: relative; background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; transition: 0.3s; }
         .input-wrapper:focus-within { border-color: var(--accent-orange); box-shadow: 0 0 15px var(--accent-glow); background: #000; }
-        input { width: 100%; background: transparent; border: none; color: #fff; padding: 16px 16px; font-size: 16px; font-family: 'JetBrains Mono'; outline: none; font-weight: 700; }
-        .unit { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-sub); font-weight: 700; }
+        
+        /* 入力欄のサイズをB1.1基準に縮小 */
+        input { 
+            width: 100%; background: transparent; border: none; color: #fff; 
+            padding: 14px 16px; font-size: 15px; font-family: 'JetBrains Mono'; outline: none; font-weight: 700; 
+        }
+        .unit { 
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%); 
+            font-size: 10px; color: var(--text-sub); font-weight: 600; 
+        }
 
         /* --- Right: Visualization Panel --- */
         .viz-panel { padding: 40px; overflow-y: auto; background: var(--bg-main); }
@@ -141,11 +165,10 @@
         .phase-card .en-text { font-size: 15px; }
         .p-val { font-family: 'JetBrains Mono'; font-size: 32px; font-weight: 900; color: var(--text-hero); margin-top: 16px; letter-spacing: -1px; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
 
-        /* --- Timeline Preview (Block Style Gantt) --- */
+        /* --- Timeline Preview --- */
         .preview-section { margin-top: 40px; background: #0d1117; border-radius: var(--radius); border: 1px solid var(--border); padding: 32px; }
         .gantt-track { height: 56px; background: #05070a; border-radius: 8px; position: relative; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
         
-        /* ブロックが増えるデザインのCSS */
         .gantt-block { 
             position: absolute; top: 0; height: 100%; display: flex; align-items: center; justify-content: center;
             font-family: 'JetBrains Mono'; font-size: 14px; font-weight: 900; color: #000;
@@ -220,14 +243,17 @@
             <h1 class="header-title">PROJECT CONTROL SYSTEM</h1>
         </div>
         <div class="header-right">
-            <div class="status-badge">NODE_ALPHA_ACTIVE // v3.2.0</div>
+            <div class="status-badge">NODE_ALPHA_ACTIVE // v3.3.0</div>
         </div>
     </header>
 
     <div id="page-calc" class="page active">
         <div class="config-panel">
+            
             <div class="section-title">
-                <div class="label-group"><span class="en-text">CASE METADATA</span><span class="ja-text">案件定義</span></div>
+                <div class="section-title-top">
+                    <div class="label-group" style="margin:0;"><span class="en-text">CASE METADATA</span><span class="ja-text">案件定義</span></div>
+                </div>
                 <div class="section-line"></div>
             </div>
             <div class="param-grid">
@@ -242,7 +268,9 @@
             </div>
 
             <div class="section-title mt-24">
-                <div class="label-group"><span class="en-text">CYCLE PARAMETERS</span><span class="ja-text">工程工数設定</span></div>
+                <div class="section-title-top">
+                    <div class="label-group" style="margin:0;"><span class="en-text">CYCLE PARAMETERS</span><span class="ja-text">工程工数設定</span></div>
+                </div>
                 <div class="section-line"></div>
             </div>
             <div class="param-grid">
@@ -273,7 +301,9 @@
             </div>
 
             <div class="section-title mt-24">
-                <div class="label-group"><span class="en-text">SAFETY BUFFERS</span><span class="ja-text">安全マージン</span></div>
+                <div class="section-title-top">
+                    <div class="label-group" style="margin:0;"><span class="en-text">SAFETY BUFFERS</span><span class="ja-text">安全マージン</span></div>
+                </div>
                 <div class="section-line"></div>
             </div>
             <div class="param-grid">
@@ -507,7 +537,6 @@
             return;
         }
 
-        // Bug Fix: 完全な絶対座標によるブロック式描画
         const getP = (start, end) => ({
             left: ((start - res.bStart) / duration) * 100,
             width: ((end - start) / duration) * 100
