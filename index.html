@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Converge OS - Ultimate Dashboard DB-B1.5</title>
+    <title>Converge OS - Ultimate Dashboard DB-B1.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -30,7 +30,7 @@
             display: flex; height: 100vh; overflow: hidden;
         }
 
-        /* --- Typography: En/Ja Dual Labels --- */
+        /* --- Typography --- */
         .label-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
         .en-text { font-size: 16px; font-weight: 900; color: var(--text-hero); letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
         .ja-text { font-size: 11px; font-weight: 600; color: var(--text-sub); font-family: "Hiragino Kaku Gothic ProN", sans-serif; letter-spacing: 0.5px; line-height: 1; }
@@ -70,24 +70,14 @@
         #page-calc.active { display: grid; grid-template-columns: 440px 1fr; }
         #page-history.active, #page-holiday.active { display: flex; flex-direction: column; }
 
-        /* --- Left: Config Panel (DB-B1.3 base) --- */
-        .config-panel { 
-            background: linear-gradient(180deg, #0d1117 0%, #0a0d12 100%); 
-            border-right: 1px solid var(--border); padding: 32px; overflow-y: auto; 
-        }
+        /* --- Left: Config Panel --- */
+        .config-panel { background: linear-gradient(180deg, #0d1117 0%, #0a0d12 100%); border-right: 1px solid var(--border); padding: 32px; overflow-y: auto; }
         .section-title { margin: 32px 0 24px 0; }
         .section-title:first-child { margin-top: 0; }
         .section-title-top { display: flex; align-items: center; width: 100%; margin-bottom: 4px; }
-        .section-title-top::before {
-            content: ''; display: inline-block; width: 4px; height: 18px;
-            background: var(--accent-orange); border-radius: 2px;
-            margin-right: 12px; box-shadow: 0 0 8px var(--accent-glow);
-        }
-        .section-line { 
-            height: 1px; 
-            background: linear-gradient(90deg, rgba(255,123,0,0.4), transparent); 
-            margin-top: 8px; width: 100%; 
-        }
+        .section-title-top::before { content: ''; display: inline-block; width: 4px; height: 18px; background: var(--accent-orange); border-radius: 2px; margin-right: 12px; box-shadow: 0 0 8px var(--accent-glow); }
+        .section-line { height: 1px; background: linear-gradient(90deg, rgba(255,123,0,0.4), transparent); margin-top: 8px; width: 100%; }
+
         .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
         .param-item { display: flex; flex-direction: column; }
         .full-width { grid-column: span 2; }
@@ -102,14 +92,10 @@
         /* --- Right: Visualization Panel --- */
         .viz-panel { padding: 40px; overflow-y: auto; background: var(--bg-main); }
         .hero-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }
-        .hero-card { 
-            background: linear-gradient(145deg, #151921, #0d1117); 
-            border-radius: var(--radius); padding: 32px; border: 1px solid var(--border);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; justify-content: space-between;
-        }
+        .hero-card { background: linear-gradient(145deg, #151921, #0d1117); border-radius: var(--radius); padding: 32px; border: 1px solid var(--border); box-shadow: 0 15px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; justify-content: space-between; }
         .hero-card .en-text { font-size: 18px; color: #fff; }
         .hero-value { font-family: 'JetBrains Mono'; font-size: 64px; font-weight: 900; color: var(--text-hero); line-height: 1; letter-spacing: -2px; margin-top: 16px; }
-        .hero-sub { font-size: 12px; color: var(--accent-orange); font-weight: 800; margin-top: 12px; letter-spacing: 1px; }
+        .hero-sub { font-size: 13px; color: var(--accent-orange); font-weight: 800; margin-top: 12px; letter-spacing: 1px; }
 
         .viz-main { display: grid; grid-template-columns: 1fr 440px; gap: 32px; }
         .chart-card { background: #0d1117; border-radius: var(--radius); border: 1px solid var(--border); position: relative; min-height: 480px; display: flex; flex-direction: column; align-items: center; justify-content: center; background-image: radial-gradient(circle at center, rgba(255,255,255,0.03) 2px, transparent 2px); background-size: 24px 24px; }
@@ -128,56 +114,82 @@
         .p-val { font-family: 'JetBrains Mono'; font-size: 32px; font-weight: 900; color: var(--text-hero); margin-top: 16px; letter-spacing: -1px; }
 
         /* --- Dot Matrix Gantt Core Styles --- */
+        /* 改行（wrap）を禁止し、1列で横スクロールさせる */
         .dot-matrix-container {
-            display: flex; flex-wrap: wrap; gap: 4px; padding: 12px;
+            display: flex; flex-wrap: nowrap; overflow-x: auto; padding: 16px 20px;
             background: #05070a; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);
-            min-height: 80px; align-content: flex-start; overflow: hidden;
+            align-items: center;
         }
+        /* Matrixコンテナ側のオーバーライド */
+        .matrix-row .dot-matrix-container { padding: 0; background: transparent; border: none; overflow: visible; }
+        
         .dot {
-            width: 10px; height: 10px; border-radius: 2px;
+            width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+            margin-right: 4px; /* 10+4 = 14px/日 に固定 */
             background: var(--empty-dot); transition: all 0.3s ease; position: relative;
         }
-        /* 発光色 */
         .dot.active-build { background: var(--build-color); box-shadow: 0 0 5px var(--build-color); }
         .dot.active-elec { background: var(--elec-color); box-shadow: 0 0 5px var(--elec-color); }
         .dot.active-test { background: var(--test-color); box-shadow: 0 0 5px var(--test-color); }
-        
-        /* 意味のあるガントチャート（始点と終点の強調） */
-        .dot.phase-edge { 
-            transform: scale(1.3); 
-            box-shadow: 0 0 15px currentColor; 
-            z-index: 2;
-            outline: 1px solid rgba(255,255,255,0.5);
+        .dot.phase-edge { transform: scale(1.3); box-shadow: 0 0 15px currentColor; z-index: 2; outline: 1px solid rgba(255,255,255,0.5); }
+
+        .preview-section { margin-top: 40px; background: #0d1117; border-radius: var(--radius); border: 1px solid var(--border); padding: 32px; }
+
+        /* --- Master Board (Sticky Headers/Cols) --- */
+        .main-panel { padding: 40px; background: var(--bg-main); flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .matrix-container { 
+            background: #0d1117; border-radius: var(--radius); border: 1px solid var(--border); 
+            overflow: auto; flex: 1; position: relative;
         }
-
-        /* --- Master Board Enhancements --- */
-        .main-panel { padding: 40px; overflow-y: auto; background: var(--bg-main); flex: 1; }
-        .matrix-container { background: #0d1117; border-radius: var(--radius); border: 1px solid var(--border); overflow-x: auto; }
-        .matrix-axis { display: flex; background: rgba(0,0,0,0.4); height: 50px; align-items: center; border-bottom: 1px solid var(--border); min-width: 1500px; }
-        .axis-cell { flex: 1; padding: 0 15px; font-family: 'JetBrains Mono'; font-size: 12px; font-weight: 800; color: var(--text-sub); border-right: 1px solid rgba(255,255,255,0.05); }
-        .matrix-row { display: flex; height: 110px; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); min-width: 1500px; transition: 0.2s; cursor: pointer; }
+        /* Sticky Axis (上固定) */
+        .matrix-axis { 
+            display: flex; background: rgba(5, 7, 10, 0.95); backdrop-filter: blur(10px); height: 60px; align-items: center; 
+            border-bottom: 1px solid var(--border); 
+            position: sticky; top: 0; z-index: 20; width: max-content; min-width: 100%;
+        }
+        /* Sticky Top-Left Corner (左上固定) */
+        .matrix-axis .matrix-info {
+            position: sticky; left: 0; z-index: 30; background: #05070a; border-bottom: 1px solid var(--border);
+        }
+        /* 同期用 Axis Cell */
+        .axis-cell { 
+            font-family: 'JetBrains Mono'; font-size: 12px; font-weight: 800; color: var(--text-sub); 
+            border-right: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; box-sizing: border-box;
+            display: flex; align-items: center; padding-left: 10px;
+        }
+        .matrix-row { 
+            display: flex; height: 90px; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            transition: 0.2s; cursor: pointer; width: max-content; min-width: 100%;
+        }
         .matrix-row:hover { background: rgba(255,255,255,0.03); }
-        .matrix-info { width: 300px; padding: 0 32px; border-right: 1px solid var(--border); flex-shrink: 0; }
-        .matrix-visual { flex: 1; height: 100%; display: flex; align-items: center; padding: 0 20px; }
+        
+        /* Sticky Left Column (左固定) */
+        .matrix-info { 
+            width: 320px; padding: 0 32px; border-right: 1px solid var(--border); flex-shrink: 0; 
+            height: 100%; display: flex; align-items: center;
+            position: sticky; left: 0; z-index: 10; background: #0d1117; transition: background 0.2s;
+        }
+        .matrix-row:hover .matrix-info { background: #161b22; } /* ホバー連動 */
+        
+        .matrix-visual { display: flex; align-items: center; padding: 0; height: 100%; }
 
-        /* --- Buttons --- */
+        /* --- Buttons & Utilities --- */
         .btn-action { width: 100%; padding: 20px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--accent-orange), #cc6200); cursor: pointer; transition: 0.3s; margin-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .btn-action:hover { transform: translateY(-3px); box-shadow: 0 15px 30px var(--accent-glow); }
         .btn-action .en-text { color: #000; font-size: 16px; }
-        .btn-action .ja-text { color: rgba(0,0,0,0.8); font-size: 11px; }
-
-        /* --- Holiday --- */
-        .holiday-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 32px; }
+        .btn-secondary { width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: transparent; cursor: pointer; margin-top: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.05); border-color: var(--text-sub); }
+        .holiday-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 32px; overflow-y: auto;}
         .month-card { background: #0d1117; border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); }
         .month-name { font-family: 'JetBrains Mono'; font-size: 20px; color: var(--accent-orange); text-align: center; margin-bottom: 24px; font-weight: 900; }
         .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
         .day-cell { height: 44px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-family: 'JetBrains Mono'; cursor: pointer; border-radius: 8px; transition: 0.1s; color: var(--text-hero); font-weight: 800; }
         .day-cell.weekend { background: rgba(255, 123, 0, 0.05); color: var(--accent-orange); cursor: default; }
         .day-cell.holiday { background: var(--accent-orange); color: #000; font-weight: 900; box-shadow: 0 0 20px var(--accent-glow); }
-        .day-cell.empty { cursor: default; }
 
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-corner { background: transparent; }
     </style>
 </head>
 <body>
@@ -202,24 +214,17 @@
     <header class="header">
         <div class="header-left"><div class="hud-stats"><span>ENGINE: ONLINE</span><span>MEM: OPTIMIZED</span></div></div>
         <div class="header-center"><h1 class="header-title">PROJECT CONTROL SYSTEM</h1></div>
-        <div class="header-right"><div class="status-badge">NODE_ALPHA_ACTIVE // v3.5.0</div></div>
+        <div class="header-right"><div class="status-badge">NODE_ALPHA_ACTIVE // v3.6.0</div></div>
     </header>
 
     <div id="page-calc" class="page active">
         <div class="config-panel">
-            <div class="section-title">
-                <div class="section-title-top"><div class="label-group" style="margin:0;"><span class="en-text">CASE METADATA</span><span class="ja-text">案件定義</span></div></div>
-                <div class="section-line"></div>
-            </div>
+            <div class="section-title"><div class="section-title-top"><div class="label-group" style="margin:0;"><span class="en-text">CASE METADATA</span><span class="ja-text">案件定義</span></div></div><div class="section-line"></div></div>
             <div class="param-grid">
                 <div class="param-item full-width"><div class="label-group"><span class="en-text">CLIENT NAME</span><span class="ja-text">顧客名</span></div><div class="input-wrapper"><input type="text" id="compName" placeholder="e.g. TOYOTA" oninput="calculate()"></div></div>
                 <div class="param-item full-width"><div class="label-group"><span class="en-text">DESIGNATION</span><span class="ja-text">案件識別名</span></div><div class="input-wrapper"><input type="text" id="factName" placeholder="e.g. LINE_01_NEW" oninput="calculate()"></div></div>
             </div>
-
-            <div class="section-title mt-24">
-                <div class="section-title-top"><div class="label-group" style="margin:0;"><span class="en-text">CYCLE PARAMETERS</span><span class="ja-text">工程工数設定</span></div></div>
-                <div class="section-line"></div>
-            </div>
+            <div class="section-title mt-24"><div class="section-title-top"><div class="label-group" style="margin:0;"><span class="en-text">CYCLE PARAMETERS</span><span class="ja-text">工程工数設定</span></div></div><div class="section-line"></div></div>
             <div class="param-grid">
                 <div class="param-item full-width"><div class="label-group"><span class="en-text">TARGET DEADLINE</span><span class="ja-text">立会予定日</span></div><div class="input-wrapper"><input type="date" id="deadline" oninput="calculate()"></div></div>
                 <div class="param-item"><div class="label-group"><span class="en-text">BUILD HRS</span><span class="ja-text">組立工数</span></div><div class="input-wrapper"><input type="number" id="buildHours" value="0" oninput="calculate()"><span class="unit">h</span></div></div>
@@ -228,16 +233,11 @@
                 <div class="param-item"><div class="label-group"><span class="en-text">TEST FORCE</span><span class="ja-text">試運転人数</span></div><div class="input-wrapper"><input type="number" id="testWorkers" value="0" step="0.5" oninput="calculate()"><span class="unit">man</span></div></div>
                 <div class="param-item full-width"><div class="label-group"><span class="en-text">ELECTRICAL DAYS</span><span class="ja-text">電工日数</span></div><div class="input-wrapper"><input type="number" id="elecDays" value="0" oninput="calculate()"><span class="unit">days</span></div></div>
             </div>
-
-            <div class="section-title mt-24">
-                <div class="section-title-top"><div class="label-group" style="margin:0;"><span class="en-text">SAFETY BUFFERS</span><span class="ja-text">安全マージン</span></div></div>
-                <div class="section-line"></div>
-            </div>
+            <div class="section-title mt-24"><div class="section-title-top"><div class="label-group" style="margin:0;"><span class="en-text">SAFETY BUFFERS</span><span class="ja-text">安全マージン</span></div></div><div class="section-line"></div></div>
             <div class="param-grid">
                 <div class="param-item"><div class="label-group"><span class="en-text">TEST-FINAL</span><span class="ja-text">試運転後</span></div><div class="input-wrapper"><input type="number" id="bufT2D" value="0" oninput="calculate()"></div></div>
                 <div class="param-item"><div class="label-group"><span class="en-text">ELEC-TEST</span><span class="ja-text">電工後</span></div><div class="input-wrapper"><input type="number" id="bufE2T" value="0" oninput="calculate()"></div></div>
             </div>
-
             <button class="btn-action" onclick="saveProject()"><div class="label-group" style="margin:0;"><span class="en-text" style="color:#000;">COMMIT PROJECT DATA</span><span class="ja-text" style="color:rgba(0,0,0,0.8);">マスターボードへ保存</span></div></button>
         </div>
 
@@ -247,13 +247,9 @@
                 <div class="hero-card"><div class="label-group"><span class="en-text">LAUNCH DATE</span><span class="ja-text">着工予定日</span></div><div class="hero-value" id="hero-start" style="font-size: 42px; padding-top: 15px;">--/--</div><div class="hero-sub">EST. START</div></div>
                 <div class="hero-card"><div class="label-group"><span class="en-text">CYCLE LOAD</span><span class="ja-text">リソース負荷率</span></div><div class="hero-value" id="hero-load">0%</div><div class="hero-sub">OPTIMIZED</div></div>
             </div>
-
             <div class="viz-main">
                 <div class="chart-card">
-                    <div class="donut-box">
-                        <svg width="340" height="340" id="pie-chart"></svg>
-                        <div class="donut-overlay"><span class="donut-num" id="work-days-count">0</span><span class="donut-unit">Net Work Days</span></div>
-                    </div>
+                    <div class="donut-box"><svg width="340" height="340" id="pie-chart"></svg><div class="donut-overlay"><span class="donut-num" id="work-days-count">0</span><span class="donut-unit">Net Work Days</span></div></div>
                 </div>
                 <div class="phase-list">
                     <div class="phase-card build"><div class="label-group"><span class="en-text">PHASE 01: BUILD</span><span class="ja-text">組立工程</span></div><div id="txt-build" class="p-val">-</div></div>
@@ -261,9 +257,8 @@
                     <div class="phase-card test"><div class="label-group"><span class="en-text">PHASE 03: VALIDATION</span><span class="ja-text">試運転</span></div><div id="txt-test" class="p-val">-</div></div>
                 </div>
             </div>
-
             <div class="preview-section">
-                <div class="label-group" style="margin-bottom: 24px;"><span class="en-text" style="font-size:16px;">TIMELINE MATRIX PREVIEW</span><span class="ja-text">ドットマトリクス・プレビュー（発光ドット＝始点・終点）</span></div>
+                <div class="label-group" style="margin-bottom: 24px;"><span class="en-text" style="font-size:16px;">TIMELINE MATRIX PREVIEW</span><span class="ja-text">ドットマトリクス・プレビュー（横スクロール）</span></div>
                 <div id="gantt-preview" class="dot-matrix-container"></div>
             </div>
         </div>
@@ -271,7 +266,7 @@
 
     <div id="page-history" class="page">
         <div class="main-panel">
-            <div class="label-group" style="margin-bottom: 32px;"><span class="en-text" style="font-size:18px;">NODE MATRIX MONITOR</span><span class="ja-text">全体スケジュール監視（ドットマトリクス形式）</span></div>
+            <div class="label-group" style="margin-bottom: 32px;"><span class="en-text" style="font-size:18px;">NODE MATRIX MONITOR</span><span class="ja-text">全体スケジュール監視（スクロール固定）</span></div>
             <div class="matrix-container">
                 <div id="matrix-axis" class="matrix-axis"></div>
                 <div id="matrix-list"></div>
@@ -280,7 +275,10 @@
     </div>
 
     <div id="page-holiday" class="page">
-        <div class="main-panel"><div class="label-group" style="margin-bottom: 32px;"><span class="en-text" style="font-size:18px;">SYSTEM INACTIVE CYCLES</span><span class="ja-text">休日・社内カレンダー設定</span></div><div id="holiday-grid" class="holiday-grid"></div></div>
+        <div class="main-panel" style="overflow-y:auto;">
+            <div class="label-group" style="margin-bottom: 32px;"><span class="en-text" style="font-size:18px;">SYSTEM INACTIVE CYCLES</span><span class="ja-text">休日・社内カレンダー設定</span></div>
+            <div id="holiday-grid" class="holiday-grid"></div>
+        </div>
     </div>
 </div>
 
@@ -290,42 +288,21 @@
     let computedData = { dayMap: [], source: null };
 
     // --- Core Logic ---
-    function isWorkDay(date) {
-        const d = date.getDay();
-        return d !== 0 && d !== 6 && !customHolidays.has(formatDate(new Date(date)));
-    }
-    function formatDate(date) {
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    }
-    function getPrevWorkDay(date) {
-        let d = new Date(date); d.setDate(d.getDate() - 1);
-        while(!isWorkDay(d)) d.setDate(d.getDate() - 1);
-        return d;
-    }
-    function subtractWorkDays(start, count) {
-        let curr = new Date(start);
-        if (count <= 1) return curr;
-        let c = 1;
-        while(c < count) {
-            curr.setDate(curr.getDate() - 1);
-            if(isWorkDay(curr)) c++;
-        }
-        return curr;
-    }
+    function isWorkDay(date) { const d = date.getDay(); return d !== 0 && d !== 6 && !customHolidays.has(formatDate(new Date(date))); }
+    function formatDate(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
+    function getPrevWorkDay(date) { let d = new Date(date); d.setDate(d.getDate() - 1); while(!isWorkDay(d)) d.setDate(d.getDate() - 1); return d; }
+    function subtractWorkDays(start, count) { let curr = new Date(start); if (count <= 1) return curr; let c = 1; while(c < count) { curr.setDate(curr.getDate() - 1); if(isWorkDay(curr)) c++; } return curr; }
 
     function runLogic(s) {
         const deadline = new Date(s.deadline.replace(/-/g, '/'));
         if (isNaN(deadline)) return null;
         const bDays = s.bHrs > 0 && s.bWkr > 0 ? Math.ceil(s.bHrs / (s.bWkr * 8)) : 0;
         const tDays = s.tHrs > 0 && s.tWkr > 0 ? Math.ceil(s.tHrs / (s.tWkr * 8)) : 0;
-        let tEnd = new Date(deadline);
-        for(let i=0; i<s.bufT; i++) tEnd = getPrevWorkDay(tEnd);
+        let tEnd = new Date(deadline); for(let i=0; i<s.bufT; i++) tEnd = getPrevWorkDay(tEnd);
         const tStart = tDays > 0 ? subtractWorkDays(tEnd, tDays) : new Date(tEnd);
-        let eEnd = new Date(tStart);
-        for(let i=0; i<s.bufE; i++) eEnd = getPrevWorkDay(eEnd);
+        let eEnd = new Date(tStart); for(let i=0; i<s.bufE; i++) eEnd = getPrevWorkDay(eEnd);
         const eStart = s.eD > 0 ? subtractWorkDays(eEnd, s.eD) : new Date(eEnd);
-        let bEnd = new Date(eStart);
-        const bStart = bDays > 0 ? subtractWorkDays(bEnd, bDays) : new Date(bEnd);
+        let bEnd = new Date(eStart); const bStart = bDays > 0 ? subtractWorkDays(bEnd, bDays) : new Date(bEnd);
         return { bStart, bEnd, bDays, eStart, eEnd, eD:s.eD, tStart, tEnd, tDays, deadline };
     }
 
@@ -342,15 +319,10 @@
         const deadlineVal = document.getElementById('deadline').value;
         if(!deadlineVal) return;
         const source = {
-            deadline: deadlineVal,
-            bHrs: parseFloat(document.getElementById('buildHours').value) || 0,
-            tHrs: parseFloat(document.getElementById('testHours').value) || 0,
-            eD: parseInt(document.getElementById('elecDays').value) || 0,
-            bWkr: parseFloat(document.getElementById('buildWorkers').value) || 0,
-            tWkr: parseFloat(document.getElementById('testWorkers').value) || 0,
-            bufT: parseInt(document.getElementById('bufT2D').value) || 0,
-            bufE: parseInt(document.getElementById('bufE2T').value) || 0,
-            bufB: 0
+            deadline: deadlineVal, bHrs: parseFloat(document.getElementById('buildHours').value) || 0,
+            tHrs: parseFloat(document.getElementById('testHours').value) || 0, eD: parseInt(document.getElementById('elecDays').value) || 0,
+            bWkr: parseFloat(document.getElementById('buildWorkers').value) || 0, tWkr: parseFloat(document.getElementById('testWorkers').value) || 0,
+            bufT: parseInt(document.getElementById('bufT2D').value) || 0, bufE: parseInt(document.getElementById('bufE2T').value) || 0, bufB: 0
         };
         const res = runLogic(source);
         if (!res) return;
@@ -362,9 +334,14 @@
         document.getElementById('hero-total').innerText = totalDays;
         document.getElementById('hero-start').innerText = totalDays > 0 ? `${res.bStart.getFullYear()}.${f(res.bStart)}` : '--/--';
         document.getElementById('work-days-count').innerText = res.bDays + res.eD + res.tDays;
-        document.getElementById('hero-load').innerText = totalDays > 0 ? '94.2%' : '0%';
+        
         drawDonut([{ days: res.bDays, color: 'var(--build-color)' }, { days: res.eD, color: 'var(--elec-color)' }, { days: res.tDays, color: 'var(--test-color)' }, { days: source.bufT + source.bufE, color: '#1f2937' }]);
-        updateDotMatrix(res);
+        
+        const container = document.getElementById('gantt-preview');
+        container.innerHTML = '';
+        if (totalDays > 0) generateDots(container, res, totalDays + 1, res.bStart);
+        else container.innerHTML = '<div style="color:var(--text-sub);">> PENDING...</div>';
+        
         computedData.source = { ...source, comp: document.getElementById('compName').value, fact: document.getElementById('factName').value };
     }
 
@@ -378,81 +355,66 @@
             if (p.days <= 0) return;
             const ratio = p.days / total;
             const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("class", "donut-segment");
-            circle.setAttribute("cx", 170); circle.setAttribute("cy", 170); circle.setAttribute("r", R);
-            circle.setAttribute("stroke", p.color);
-            circle.setAttribute("stroke-dasharray", `${ratio * C} ${C}`);
-            circle.setAttribute("stroke-dashoffset", -offset * C);
-            svg.appendChild(circle);
-            offset += ratio;
+            circle.setAttribute("class", "donut-segment"); circle.setAttribute("cx", 170); circle.setAttribute("cy", 170); circle.setAttribute("r", R);
+            circle.setAttribute("stroke", p.color); circle.setAttribute("stroke-dasharray", `${ratio * C} ${C}`); circle.setAttribute("stroke-dashoffset", -offset * C);
+            svg.appendChild(circle); offset += ratio;
         });
     }
 
-    // --- Dot Matrix Generation ---
+    // --- Dot Matrix Logic (幅同期修正済み) ---
     function generateDots(container, res, totalDaysScope, startDateScope) {
-        container.innerHTML = '';
-        const dayCount = totalDaysScope;
-        
-        for (let i = 0; i < dayCount; i++) {
+        for (let i = 0; i < totalDaysScope; i++) {
             const current = new Date(startDateScope);
             current.setDate(current.getDate() + i);
             const dot = document.createElement('div');
             dot.className = 'dot';
-            dot.title = current.toLocaleDateString(); // Hoverで日付表示
+            dot.title = current.toLocaleDateString(); 
             
             const time = current.getTime();
             const isS = (t, start, end) => t >= start.getTime() && t <= end.getTime();
             const isEdge = (t, start, end) => (t === start.getTime() || t === end.getTime());
 
-            if (isS(time, res.bStart, res.bEnd)) {
-                dot.classList.add('active-build');
-                if(isEdge(time, res.bStart, res.bEnd)) dot.classList.add('phase-edge');
-            } else if (isS(time, res.eStart, res.eEnd)) {
-                dot.classList.add('active-elec');
-                if(isEdge(time, res.eStart, res.eEnd)) dot.classList.add('phase-edge');
-            } else if (isS(time, res.tStart, res.tEnd)) {
-                dot.classList.add('active-test');
-                if(isEdge(time, res.tStart, res.tEnd)) dot.classList.add('phase-edge');
-            }
+            if (res.bDays > 0 && isS(time, res.bStart, res.bEnd)) { dot.classList.add('active-build'); if(isEdge(time, res.bStart, res.bEnd)) dot.classList.add('phase-edge'); }
+            else if (res.eD > 0 && isS(time, res.eStart, res.eEnd)) { dot.classList.add('active-elec'); if(isEdge(time, res.eStart, res.eEnd)) dot.classList.add('phase-edge'); }
+            else if (res.tDays > 0 && isS(time, res.tStart, res.tEnd)) { dot.classList.add('active-test'); if(isEdge(time, res.tStart, res.tEnd)) dot.classList.add('phase-edge'); }
             container.appendChild(dot);
         }
     }
 
-    function updateDotMatrix(res) {
-        const container = document.getElementById('gantt-preview');
-        const total = Math.ceil((res.deadline - res.bStart) / (1000*60*60*24)) + 1;
-        if (total <= 0 || total > 1000) {
-            container.innerHTML = '<div style="color:var(--text-sub);">> PENDING...</div>';
-            return;
-        }
-        generateDots(container, res, total, res.bStart);
-    }
-
     function renderMasterMatrix() {
         const list = document.getElementById('matrix-list'); const axis = document.getElementById('matrix-axis');
-        list.innerHTML = ''; axis.innerHTML = '<div class="matrix-info" style="border:none;"></div>';
+        list.innerHTML = ''; axis.innerHTML = '<div class="matrix-info"><div class="label-group" style="margin:0;"><span class="en-text">NODE / CLIENT</span><span class="ja-text">ノード / 顧客情報</span></div></div>';
         if (savedProjects.length === 0) return list.innerHTML = '<p style="padding:40px; color:var(--text-sub);">> MATRIX_EMPTY</p>';
         
         const analyzed = savedProjects.map(p => ({ ...p, res: runLogic(p) })).filter(p => p.res !== null);
+        if (analyzed.length === 0) return;
+        
         const allDates = analyzed.flatMap(p => [p.res.bStart, p.res.deadline]);
-        const minD = new Date(Math.min(...allDates)); const maxD = new Date(Math.max(...allDates));
+        // 同期のため、開始日を「一番早い月の1日」、終了日を「一番遅い月の月末」に丸める
+        let minD = new Date(Math.min(...allDates)); 
+        minD = new Date(minD.getFullYear(), minD.getMonth(), 1);
+        let maxD = new Date(Math.max(...allDates));
+        maxD = new Date(maxD.getFullYear(), maxD.getMonth() + 1, 0);
+        
         const totalDurationDays = Math.ceil((maxD - minD) / (1000*60*60*24)) + 1;
 
-        // Axis
-        let curr = new Date(minD.getFullYear(), minD.getMonth(), 1);
+        // 月ごとヘッダー(Axis)の生成 (1日=14px幅)
+        let curr = new Date(minD);
         while(curr <= maxD) {
+            const daysInMonth = new Date(curr.getFullYear(), curr.getMonth() + 1, 0).getDate();
             const cell = document.createElement('div'); cell.className = 'axis-cell';
-            cell.innerText = `${curr.getFullYear()}.${String(curr.getMonth()+1).padStart(2, '0')}`; axis.appendChild(cell);
+            cell.style.width = `${daysInMonth * 14}px`; // 幅の完全同期
+            cell.style.minWidth = `${daysInMonth * 14}px`;
+            cell.innerText = `${curr.getFullYear()}.${String(curr.getMonth()+1).padStart(2, '0')}`; 
+            axis.appendChild(cell);
             curr.setMonth(curr.getMonth() + 1);
         }
 
         analyzed.forEach(p => {
             const row = document.createElement('div'); row.className = 'matrix-row';
-            row.innerHTML = `<div class="matrix-info"><div class="label-group" style="margin:0;"><span class="en-text" style="font-size:16px;">${p.fact || 'NODE'}</span><span class="ja-text">${p.comp || 'UNKNOWN'}</span></div></div><div class="matrix-visual dot-matrix-container" style="background:transparent; border:none; gap:3px;"></div>`;
-            
+            row.innerHTML = `<div class="matrix-info"><div class="label-group" style="margin:0;"><span class="en-text" style="font-size:16px; color:#fff;">${p.fact || 'NODE_NULL'}</span><span class="ja-text" style="font-size:12px;">${p.comp || 'UNKNOWN'}</span></div></div><div class="matrix-visual dot-matrix-container"></div>`;
             const visual = row.querySelector('.matrix-visual');
             generateDots(visual, p.res, totalDurationDays, minD);
-            
             row.onclick = () => {
                 showPage('calc');
                 document.getElementById('compName').value = p.comp; document.getElementById('factName').value = p.fact; document.getElementById('deadline').value = p.deadline;
@@ -480,9 +442,7 @@
                     const cell = document.createElement('div');
                     cell.className = 'day-cell' + (customHolidays.has(ds)?' holiday':(isWeekend?' weekend':''));
                     cell.innerText = d;
-                    if (!isWeekend) {
-                        cell.onclick = () => { if(customHolidays.has(ds)) customHolidays.delete(ds); else customHolidays.add(ds); localStorage.setItem('press_holidays', JSON.stringify([...customHolidays])); renderHolidays(); };
-                    }
+                    if (!isWeekend) cell.onclick = () => { if(customHolidays.has(ds)) customHolidays.delete(ds); else customHolidays.add(ds); localStorage.setItem('press_holidays', JSON.stringify([...customHolidays])); renderHolidays(); };
                     days.appendChild(cell);
                 }
                 card.appendChild(days); grid.appendChild(card);
@@ -494,7 +454,7 @@
         if(!computedData.source.comp || !computedData.source.fact) return alert("PARAM_ERROR");
         savedProjects.unshift({ id: Date.now(), ...computedData.source });
         localStorage.setItem('press_master_v2', JSON.stringify(savedProjects));
-        alert("SUCCESS: COMMITTED");
+        alert("SUCCESS: COMMITTED TO MATRIX");
     }
 
     window.onload = () => {
