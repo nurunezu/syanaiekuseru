@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Converge V2 - Project Control Center</title>
+    <title>Converge OS - Project Manager V2</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -32,117 +32,97 @@
         /* --- Sidebar Navigation --- */
         .sidebar {
             width: 72px; background: #010409; border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; padding: 24px 0; gap: 32px;
+            display: flex; flex-direction: column; align-items: center; padding: 24px 0; gap: 32px; z-index: 100;
         }
         .logo { width: 32px; height: 32px; background: var(--accent-orange); border-radius: 8px; box-shadow: 0 0 15px var(--accent-glow); }
-        .nav-icon { color: var(--text-sub); cursor: pointer; transition: 0.2s; font-size: 20px; }
-        .nav-icon.active { color: var(--accent-orange); }
+        .nav-icon { color: var(--text-sub); cursor: pointer; transition: 0.2s; font-size: 20px; text-decoration: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; }
+        .nav-icon:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .nav-icon.active { color: var(--accent-orange); background: rgba(255,123,0,0.1); }
 
-        /* --- Main Dashboard --- */
+        /* --- Main Dashboard Container --- */
         .dashboard { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
         
         .header {
             height: 64px; border-bottom: 1px solid var(--border);
             display: flex; align-items: center; justify-content: space-between; padding: 0 32px;
-            background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(10px);
+            background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(10px); flex-shrink: 0;
         }
-        .header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; margin: 0; }
-        .status-badge { font-family: 'JetBrains Mono'; font-size: 11px; background: #1f2937; padding: 4px 12px; border-radius: 20px; color: var(--accent-orange); border: 1px solid var(--accent-orange); }
+        .header h1 { font-size: 16px; font-weight: 700; letter-spacing: 1px; margin: 0; display: flex; align-items: center; gap: 12px; }
+        .header h1::before { content: ''; width: 8px; height: 8px; background: var(--accent-orange); border-radius: 50%; box-shadow: 0 0 8px var(--accent-orange); }
+        .status-badge { font-family: 'JetBrains Mono'; font-size: 10px; background: #1f2937; padding: 4px 12px; border-radius: 20px; color: var(--accent-orange); border: 1px solid var(--accent-orange); letter-spacing: 0.5px; }
 
-        /* --- 2-Pane Layout --- */
-        .content { flex: 1; display: grid; grid-template-columns: 380px 1fr; overflow: hidden; }
+        /* --- Page Structure --- */
+        .page { display: none; height: 100%; }
+        .page.active { display: flex; flex-direction: column; overflow: hidden; }
+        .content-grid { flex: 1; display: grid; grid-template-columns: 380px 1fr; overflow: hidden; }
 
-        /* Left: Config Panel */
-        .config-panel {
-            background: #0d1117; border-right: 1px solid var(--border);
-            padding: 24px; overflow-y: auto;
-        }
+        /* --- Common Components --- */
+        .side-panel { background: #0d1117; border-right: 1px solid var(--border); padding: 24px; overflow-y: auto; }
+        .main-panel { padding: 32px; overflow-y: auto; background: var(--bg-main); flex: 1; }
+        
         .section-title { 
-            font-size: 12px; color: var(--text-sub); text-transform: uppercase; 
-            letter-spacing: 1.5px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+            font-size: 11px; color: var(--text-sub); text-transform: uppercase; 
+            letter-spacing: 1.5px; margin: 24px 0 16px 0; display: flex; align-items: center; gap: 8px;
         }
+        .section-title:first-child { margin-top: 0; }
         .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+        /* --- Forms & Inputs --- */
+        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
         .param-item { display: flex; flex-direction: column; gap: 6px; }
         .full-width { grid-column: span 2; }
+        label { font-size: 10px; font-weight: 700; color: var(--text-sub); letter-spacing: 0.5px; }
+        .input-wrapper { position: relative; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; }
+        input { width: 100%; background: transparent; border: none; color: #fff; padding: 10px 12px; font-size: 13px; font-family: 'JetBrains Mono'; outline: none; }
+        .unit { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 9px; color: var(--text-sub); pointer-events: none; }
+
+        /* --- Cards & Stats --- */
+        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+        .stat-card { background: var(--bg-card); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); }
+        .stat-label { font-size: 10px; color: var(--text-sub); text-transform: uppercase; margin-bottom: 8px; }
+        .stat-value { font-family: 'JetBrains Mono'; font-size: 22px; font-weight: 700; color: #fff; }
+
+        /* --- Master Matrix (History) Styles --- */
+        .matrix-container { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); overflow-x: auto; }
+        .matrix-axis { display: flex; background: rgba(0,0,0,0.2); height: 44px; align-items: center; border-bottom: 1px solid var(--border); min-width: 1200px; }
+        .axis-cell { flex: 1; padding: 0 15px; font-family: 'JetBrains Mono'; font-size: 10px; color: var(--text-sub); border-right: 1px solid rgba(255,255,255,0.05); }
+        .matrix-row { display: flex; height: 80px; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); min-width: 1200px; transition: 0.2s; cursor: pointer; }
+        .matrix-row:hover { background: rgba(255,255,255,0.02); }
+        .matrix-info { width: 240px; padding: 0 24px; border-right: 1px solid var(--border); flex-shrink: 0; }
+        .node-id { font-size: 13px; font-weight: 700; color: #fff; }
+        .client-name { font-size: 11px; color: var(--text-sub); margin-top: 4px; }
+        .matrix-visual { flex: 1; position: relative; height: 100%; display: flex; align-items: center; padding: 0 20px; }
         
-        label { font-size: 11px; font-weight: 600; color: var(--text-sub); }
-        .input-wrapper {
-            position: relative; background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: 8px; transition: 0.2s;
-        }
-        .input-wrapper:focus-within { border-color: var(--accent-orange); box-shadow: 0 0 0 2px var(--accent-glow); }
-        
-        input {
-            width: 100%; background: transparent; border: none; color: #fff;
-            padding: 10px 12px; font-size: 14px; font-family: 'JetBrains Mono'; outline: none;
-        }
-        .unit { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--text-sub); }
+        .gantt-bar { position: absolute; height: 28px; display: flex; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .gantt-seg { height: 100%; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono'; font-size: 9px; font-weight: 700; }
+        .bg-build { background: var(--build-color); color: #000; }
+        .bg-elec { background: var(--elec-color); color: #000; }
+        .bg-test { background: var(--test-color); color: #fff; }
+        .bg-empty { background: repeating-linear-gradient(45deg, #1f2937, #1f2937 5px, #151921 5px, #151921 10px); }
 
-        /* Right: Visualization Panel */
-        .viz-panel { padding: 32px; overflow-y: auto; background: var(--bg-main); }
-        
-        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
-        .stat-card {
-            background: var(--bg-card); border-radius: var(--radius); padding: 20px;
-            border: 1px solid var(--border); position: relative; overflow: hidden;
-        }
-        .stat-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--accent-orange); opacity: 0.5;
-        }
-        .stat-label { font-size: 11px; color: var(--text-sub); margin-bottom: 8px; text-transform: uppercase; }
-        .stat-value { font-family: 'JetBrains Mono'; font-size: 24px; font-weight: 700; color: #fff; }
-        .stat-sub { font-size: 12px; color: var(--accent-orange); margin-top: 4px; }
+        /* --- System Cal (Holiday) Styles --- */
+        .holiday-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+        .month-card { background: var(--bg-card); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); }
+        .month-name { font-family: 'JetBrains Mono'; font-size: 14px; color: var(--accent-orange); text-align: center; margin-bottom: 16px; font-weight: 700; letter-spacing: 1px; }
+        .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .day-cell { height: 32px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-family: 'JetBrains Mono'; cursor: pointer; border-radius: 6px; transition: 0.1s; color: var(--text-sub); }
+        .day-cell:hover:not(.empty) { background: rgba(255,255,255,0.05); color: #fff; }
+        .day-cell.holiday { background: var(--accent-orange); color: #000; font-weight: 700; box-shadow: 0 0 10px var(--accent-glow); }
+        .day-cell.empty { cursor: default; }
 
-        /* Visualization Box */
-        .viz-main { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
-        .chart-container {
-            background: var(--bg-card); border-radius: var(--radius); padding: 32px;
-            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
-            position: relative; min-height: 400px;
-        }
-        
-        .donut-box { position: relative; width: 300px; height: 300px; }
-        .donut-overlay {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            text-align: center; pointer-events: none;
-        }
-        .donut-num { font-family: 'JetBrains Mono'; font-size: 42px; font-weight: 700; display: block; color: var(--accent-orange); }
-        .donut-unit { font-size: 10px; color: var(--text-sub); letter-spacing: 2px; }
+        /* --- Buttons --- */
+        .btn-prime { width: 100%; padding: 14px; background: var(--accent-orange); color: #000; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 12px; }
+        .btn-prime:hover { transform: translateY(-2px); box-shadow: 0 5px 15px var(--accent-glow); }
+        .btn-sub { width: 100%; padding: 12px; background: transparent; color: var(--text-sub); border: 1px solid var(--border); border-radius: 8px; font-size: 11px; cursor: pointer; margin-top: 12px; }
+        .btn-sub:hover { color: #fff; border-color: var(--text-sub); }
 
-        .phase-details { display: flex; flex-direction: column; gap: 12px; }
-        .phase-card {
-            background: #1c212c; border-radius: 12px; padding: 16px; border-left: 4px solid #333;
-        }
-        .phase-card.build { border-left-color: var(--build-color); }
-        .phase-card.elec { border-left-color: var(--elec-color); }
-        .phase-card.test { border-left-color: var(--test-color); }
-        .p-title { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
-        .p-val { font-family: 'JetBrains Mono'; font-size: 13px; font-weight: 600; }
+        /* --- Charts --- */
+        .donut-container { display: flex; justify-content: center; align-items: center; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 40px; position: relative; min-height: 380px; }
+        .donut-val-wrap { position: absolute; text-align: center; }
+        .donut-val { display: block; font-family: 'JetBrains Mono'; font-size: 36px; font-weight: 700; color: var(--accent-orange); }
+        .donut-label { font-size: 10px; color: var(--text-sub); letter-spacing: 2px; }
 
-        /* Gantt Mini-Board */
-        .gantt-section { margin-top: 32px; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
-        .gantt-header { padding: 16px 24px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 700; color: var(--text-sub); }
-        .gantt-body { padding: 24px; min-height: 100px; }
-
-        .btn-action {
-            width: 100%; padding: 14px; border-radius: 8px; border: none;
-            background: var(--accent-orange); color: #000; font-weight: 700;
-            font-size: 14px; cursor: pointer; transition: 0.2s; margin-top: 10px;
-        }
-        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 5px 15px var(--accent-glow); }
-        .btn-secondary {
-            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
-            background: transparent; color: var(--text-sub); font-size: 12px; cursor: pointer; margin-top: 12px;
-        }
-
-        /* SVG Chart Styles */
-        .donut-segment { fill: none; stroke-width: 32; transition: 0.5s; stroke-linecap: round; }
-        svg { transform: rotate(-90deg); }
-
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
@@ -150,151 +130,99 @@
 
 <aside class="sidebar">
     <div class="logo"></div>
-    <div class="nav-icon active">⬢</div>
-    <div class="nav-icon">📊</div>
-    <div class="nav-icon">⚙️</div>
+    <div class="nav-icon active" id="btn-nav-calc" onclick="showPage('calc')" title="New Protocol">⬢</div>
+    <div class="nav-icon" id="btn-nav-history" onclick="showPage('history')" title="Master Matrix">📊</div>
+    <div class="nav-icon" id="btn-nav-holiday" onclick="showPage('holiday')" title="System Calendar">🗓️</div>
 </aside>
 
 <div class="dashboard">
     <header class="header">
-        <h1>PROJECT CONTROL CENTER</h1>
-        <div class="status-badge">SYSTEM_READY // v2.0.4</div>
+        <h1 id="header-title">PROJECT CONTROL CENTER</h1>
+        <div class="status-badge" id="system-status">SYSTEM_ACTIVE // NODE_01</div>
     </header>
 
-    <div class="content">
-        <div class="config-panel">
-            <div class="section-title">Case Metadata</div>
-            <div class="param-grid">
-                <div class="param-item full-width">
-                    <label>CLIENT NAME</label>
-                    <div class="input-wrapper"><input type="text" id="compName" placeholder="e.g. TOYOTA" oninput="calculate()"></div>
+    <div id="page-calc" class="page active">
+        <div class="content-grid">
+            <div class="side-panel">
+                <div class="section-title">Case Definition</div>
+                <div class="param-grid">
+                    <div class="param-item full-width"><label>CLIENT</label><div class="input-wrapper"><input type="text" id="compName" placeholder="Client Entity" oninput="calculate()"></div></div>
+                    <div class="param-item full-width"><label>NODE NAME</label><div class="input-wrapper"><input type="text" id="factName" placeholder="Project ID" oninput="calculate()"></div></div>
                 </div>
-                <div class="param-item full-width">
-                    <label>PROJECT DESIGNATION</label>
-                    <div class="input-wrapper"><input type="text" id="factName" placeholder="e.g. LINE_A_RENEWAL" oninput="calculate()"></div>
+                <div class="section-title">Scheduling</div>
+                <div class="param-grid">
+                    <div class="param-item full-width"><label>TARGET DEADLINE</label><div class="input-wrapper"><input type="date" id="deadline" oninput="calculate()"></div></div>
+                    <div class="param-item"><label>BUILD HRS</label><div class="input-wrapper"><input type="number" id="buildHours" value="1920" oninput="calculate()"><span class="unit">h</span></div></div>
+                    <div class="param-item"><label>BUILD FORCE</label><div class="input-wrapper"><input type="number" id="buildWorkers" value="2.5" step="0.5" oninput="calculate()"><span class="unit">man</span></div></div>
+                    <div class="param-item"><label>TEST HRS</label><div class="input-wrapper"><input type="number" id="testHours" value="280" oninput="calculate()"><span class="unit">h</span></div></div>
+                    <div class="param-item"><label>TEST FORCE</label><div class="input-wrapper"><input type="number" id="testWorkers" value="2.5" step="0.5" oninput="calculate()"><span class="unit">man</span></div></div>
+                    <div class="param-item full-width"><label>ELEC DURATION</label><div class="input-wrapper"><input type="number" id="elecDays" value="1" oninput="calculate()"><span class="unit">days</span></div></div>
                 </div>
+                <div class="section-title">Buffers</div>
+                <div class="param-grid">
+                    <div class="param-item"><label>T > DEADLINE</label><div class="input-wrapper"><input type="number" id="bufT2D" value="1" oninput="calculate()"></div></div>
+                    <div class="param-item"><label>E > TEST</label><div class="input-wrapper"><input type="number" id="bufE2T" value="10" oninput="calculate()"></div></div>
+                </div>
+                <button class="btn-prime" onclick="saveProject()">COMMIT TO MASTER MATRIX</button>
+                <button class="btn-sub" onclick="copyExcelData()">COPY EXCEL ARRAY</button>
             </div>
-
-            <div class="section-title">Schedule Parameters</div>
-            <div class="param-grid">
-                <div class="param-item full-width">
-                    <label>FINAL DEADLINE (立会日)</label>
-                    <div class="input-wrapper"><input type="date" id="deadline" oninput="calculate()"></div>
+            <div class="main-panel">
+                <div class="stat-grid">
+                    <div class="stat-card"><div class="stat-label">Total Duration</div><div class="stat-value" id="res-total">0</div></div>
+                    <div class="stat-card"><div class="stat-label">Start Date</div><div class="stat-value" id="res-start">--/--</div></div>
+                    <div class="stat-card"><div class="stat-label">Work Days</div><div class="stat-value" id="res-work">0</div></div>
                 </div>
-                <div class="param-item">
-                    <label>BUILD HRS</label>
-                    <div class="input-wrapper"><input type="number" id="buildHours" value="1920" oninput="calculate()"><span class="unit">h</span></div>
-                </div>
-                <div class="param-item">
-                    <label>BUILD FORCE</label>
-                    <div class="input-wrapper"><input type="number" id="buildWorkers" value="2.5" step="0.5" oninput="calculate()"><span class="unit">man</span></div>
-                </div>
-                <div class="param-item">
-                    <label>TEST HRS</label>
-                    <div class="input-wrapper"><input type="number" id="testHours" value="280" oninput="calculate()"><span class="unit">h</span></div>
-                </div>
-                <div class="param-item">
-                    <label>TEST FORCE</label>
-                    <div class="input-wrapper"><input type="number" id="testWorkers" value="2.5" step="0.5" oninput="calculate()"><span class="unit">man</span></div>
-                </div>
-                <div class="param-item full-width">
-                    <label>ELECTRICAL CYCLE</label>
-                    <div class="input-wrapper"><input type="number" id="elecDays" value="1" oninput="calculate()"><span class="unit">days</span></div>
-                </div>
-            </div>
-
-            <div class="section-title">Safety Buffers</div>
-            <div class="param-grid">
-                <div class="param-item"><label>TEST > FINAL</label><div class="input-wrapper"><input type="number" id="bufT2D" value="1" oninput="calculate()"></div></div>
-                <div class="param-item"><label>ELEC > TEST</label><div class="input-wrapper"><input type="number" id="bufE2T" value="10" oninput="calculate()"></div></div>
-                <div class="param-item full-width"><label>BUILD > ELEC</label><div class="input-wrapper"><input type="number" id="bufB2E" value="0" oninput="calculate()"></div></div>
-            </div>
-
-            <button class="btn-action" onclick="saveProject()">COMMIT TO MASTER BOARD</button>
-            <button class="btn-secondary" onclick="copyExcelData()">COPY ARRAY FOR EXCEL</button>
-        </div>
-
-        <div class="viz-panel">
-            <div class="summary-cards">
-                <div class="stat-card">
-                    <div class="stat-label">Total Duration</div>
-                    <div class="stat-value" id="total-days-val">0</div>
-                    <div class="stat-sub">CALENDAR DAYS</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Production Start</div>
-                    <div class="stat-value" id="start-date-val">-- / --</div>
-                    <div class="stat-sub">ESTIMATED LAUNCH</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Resource Load</div>
-                    <div class="stat-value">92.4%</div>
-                    <div class="stat-sub">OPTIMIZED</div>
-                </div>
-            </div>
-
-            <div class="viz-main">
-                <div class="chart-container">
-                    <div class="donut-box">
+                <div style="display:grid; grid-template-columns: 1fr 280px; gap:24px;">
+                    <div class="donut-container">
                         <svg width="300" height="300" id="pie-chart"></svg>
-                        <div class="donut-overlay">
-                            <span class="donut-num" id="work-days-count">0</span>
-                            <span class="donut-unit">NET WORK DAYS</span>
-                        </div>
+                        <div class="donut-val-wrap"><span class="donut-val" id="donut-num">0</span><span class="donut-label">NET DAYS</span></div>
                     </div>
-                </div>
-                <div class="phase-details">
-                    <div class="phase-card build">
-                        <div class="p-title">BUILD PHASE (組立)</div>
-                        <div id="txt-build" class="p-val">-</div>
-                    </div>
-                    <div class="phase-card elec">
-                        <div class="p-title">ELECTRICAL (電工)</div>
-                        <div id="txt-elec" class="p-val">-</div>
-                    </div>
-                    <div class="phase-card test">
-                        <div class="p-title">TEST & VALIDATION (試運転)</div>
-                        <div id="txt-test" class="p-val">-</div>
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <div class="stat-card" style="border-left:4px solid var(--build-color);"><div class="stat-label">Build Phase</div><div class="stat-value" id="txt-build" style="font-size:14px;">-</div></div>
+                        <div class="stat-card" style="border-left:4px solid var(--elec-color);"><div class="stat-label">Elec Phase</div><div class="stat-value" id="txt-elec" style="font-size:14px;">-</div></div>
+                        <div class="stat-card" style="border-left:4px solid var(--test-color);"><div class="stat-label">Test Phase</div><div class="stat-value" id="txt-test" style="font-size:14px;">-</div></div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="gantt-section">
-                <div class="gantt-header">TIMELINE PREVIEW</div>
-                <div class="gantt-body" id="gantt-preview">
-                    <p style="color:var(--text-sub); font-size:12px; margin:0;">各フェーズの依存関係は正常です。バッファ期間が十分に確保されています。</p>
-                </div>
+    <div id="page-history" class="page">
+        <div class="main-panel" style="padding:24px;">
+            <div class="section-title">Active Node Matrix</div>
+            <div class="matrix-container">
+                <div id="matrix-axis" class="matrix-axis"></div>
+                <div id="matrix-list"></div>
             </div>
+        </div>
+    </div>
+
+    <div id="page-holiday" class="page">
+        <div class="main-panel">
+            <div class="section-title">System Inactive Cycles (Holidays)</div>
+            <div id="holiday-grid" class="holiday-grid"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // JS Logic (保持しつつUI反映を強化)
     let customHolidays = new Set();
     let savedProjects = [];
     let computedData = { dayMap: [], source: null };
 
-    window.onload = () => {
-        document.getElementById('deadline').value = "2026-10-28";
-        calculate();
-    };
-
+    // --- Core Logic ---
     function isWorkDay(date) {
         const d = date.getDay();
         return d !== 0 && d !== 6 && !customHolidays.has(formatDate(new Date(date)));
     }
-
     function formatDate(date) {
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
-
     function getPrevWorkDay(date) {
         let d = new Date(date); d.setDate(d.getDate() - 1);
         while(!isWorkDay(d)) d.setDate(d.getDate() - 1);
         return d;
     }
-
     function subtractWorkDays(start, count) {
         let curr = new Date(start);
         if (count <= 1) return curr;
@@ -322,10 +250,23 @@
         return { bStart, bEnd, bDays, eStart, eEnd, eD:s.eD, tStart, tEnd, tDays, deadline };
     }
 
+    // --- UI Actions ---
+    function showPage(p) {
+        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+        document.getElementById(`page-${p}`).classList.add('active');
+        document.querySelectorAll('.nav-icon').forEach(el => el.classList.remove('active'));
+        document.getElementById(`btn-nav-${p}`).classList.add('active');
+        
+        if(p === 'history') renderMasterMatrix();
+        if(p === 'holiday') renderHolidays();
+        
+        const titles = { calc: 'PROJECT CONTROL CENTER', history: 'MASTER MATRIX', holiday: 'SYSTEM CALENDAR' };
+        document.getElementById('header-title').innerText = titles[p];
+    }
+
     function calculate() {
         const deadlineVal = document.getElementById('deadline').value;
         if(!deadlineVal) return;
-
         const source = {
             deadline: deadlineVal,
             bHrs: parseFloat(document.getElementById('buildHours').value) || 0,
@@ -335,36 +276,34 @@
             tWkr: parseFloat(document.getElementById('testWorkers').value) || 1,
             bufT: parseInt(document.getElementById('bufT2D').value) || 0,
             bufE: parseInt(document.getElementById('bufE2T').value) || 0,
-            bufB: parseInt(document.getElementById('bufB2E').value) || 0
+            bufB: 0
         };
-
         const res = runLogic(source);
         const f = d => `${d.getMonth()+1}/${d.getDate()}`;
         
         document.getElementById('txt-build').innerText = `${f(res.bStart)} → ${f(res.bEnd)}`;
         document.getElementById('txt-elec').innerText = `${f(res.eStart)} → ${f(res.eEnd)}`;
         document.getElementById('txt-test').innerText = `${f(res.tStart)} → ${f(res.tEnd)}`;
-        
-        const totalDays = Math.ceil((res.deadline - res.bStart) / (1000*60*60*24));
-        document.getElementById('total-days-val').innerText = totalDays;
-        document.getElementById('start-date-val').innerText = `${res.bStart.getFullYear()}.${f(res.bStart)}`;
-        document.getElementById('work-days-count').innerText = res.bDays + res.eD + res.tDays;
+        document.getElementById('res-total').innerText = Math.ceil((res.deadline - res.bStart) / (1000*60*60*24));
+        document.getElementById('res-start').innerText = f(res.bStart);
+        document.getElementById('res-work').innerText = res.bDays + res.eD + res.tDays;
+        document.getElementById('donut-num').innerText = res.bDays + res.eD + res.tDays;
 
-        drawPieChart([
-            { name: 'BUILD', days: res.bDays, color: 'var(--build-color)' },
-            { name: 'ELEC', days: res.eD, color: 'var(--elec-color)' },
-            { name: 'TEST', days: res.tDays, color: 'var(--test-color)' },
-            { name: 'BUFFER', days: source.bufT + source.bufE + source.bufB, color: '#2a2f3a' }
+        drawPie([
+            { days: res.bDays, color: 'var(--build-color)' },
+            { days: res.eD, color: 'var(--elec-color)' },
+            { days: res.tDays, color: 'var(--test-color)' },
+            { days: source.bufT + source.bufE, color: '#1f2937' }
         ]);
-
-        computedData.source = source;
+        
+        generateExcelData(res.bStart, res.deadline, {bS:res.bStart, bE:res.bEnd, eS:res.eStart, eE:res.eEnd, tS:res.tStart, tE:res.tEnd});
+        computedData.source = { ...source, comp: document.getElementById('compName').value, fact: document.getElementById('factName').value };
     }
 
-    function drawPieChart(phases) {
+    function drawPie(phases) {
         const svg = document.getElementById('pie-chart'); svg.innerHTML = '';
         const total = phases.reduce((s, p) => s + p.days, 0);
         let offset = 0; const R = 120; const C = 2 * Math.PI * R;
-        
         phases.forEach(p => {
             if (p.days <= 0) return;
             const ratio = p.days / total;
@@ -379,13 +318,122 @@
         });
     }
 
+    function renderMasterMatrix() {
+        const list = document.getElementById('matrix-list'); const axis = document.getElementById('matrix-axis');
+        list.innerHTML = ''; axis.innerHTML = '<div class="matrix-info" style="border-right:none; font-size:10px; color:var(--text-sub);">NODE_ID / CLIENT</div>';
+        if (savedProjects.length === 0) return list.innerHTML = '<p style="padding:40px; color:var(--text-sub);">NO ACTIVE NODES.</p>';
+        
+        const analyzed = savedProjects.map(p => ({ ...p, res: runLogic(p) }));
+        const allDates = analyzed.flatMap(p => [p.res.bStart, p.res.deadline]);
+        const minD = new Date(Math.min(...allDates)); const maxD = new Date(Math.max(...allDates));
+        const duration = maxD - minD;
+
+        let curr = new Date(minD.getFullYear(), minD.getMonth(), 1);
+        while(curr <= maxD) {
+            const cell = document.createElement('div'); cell.className = 'axis-cell';
+            cell.innerText = `${curr.getFullYear()}.${curr.getMonth()+1}`; axis.appendChild(cell);
+            curr.setMonth(curr.getMonth() + 1);
+        }
+
+        analyzed.forEach(p => {
+            const row = document.createElement('div'); row.className = 'matrix-row';
+            row.onclick = () => {
+                showPage('calc');
+                document.getElementById('compName').value = p.comp;
+                document.getElementById('factName').value = p.fact;
+                document.getElementById('deadline').value = p.deadline;
+                document.getElementById('buildHours').value = p.bHrs;
+                document.getElementById('testHours').value = p.tHrs;
+                document.getElementById('elecDays').value = p.eD;
+                document.getElementById('buildWorkers').value = p.bWkr;
+                document.getElementById('testWorkers').value = p.tWkr;
+                document.getElementById('bufT2D').value = p.bufT;
+                document.getElementById('bufE2T').value = p.bufE;
+                calculate();
+            };
+            const left = ((p.res.bStart - minD) / duration) * 100;
+            const wB = ((p.res.bEnd - p.res.bStart) / duration) * 100;
+            const wE = ((p.res.eEnd - p.res.eStart) / duration) * 100;
+            const wT = ((p.res.tEnd - p.res.tStart) / duration) * 100;
+            const gBE = ((p.res.eStart - p.res.bEnd) / duration) * 100;
+            const gET = ((p.res.tStart - p.res.eEnd) / duration) * 100;
+            row.innerHTML = `
+                <div class="matrix-info"><div class="node-id">${p.fact || 'UNNAMED'}</div><div class="client-name">${p.comp || 'UNKNOWN'}</div></div>
+                <div class="matrix-visual">
+                    <div class="gantt-bar" style="left:${left}%; width:${100-left}%;">
+                        <div class="gantt-seg bg-build" style="width:${(wB/(100-left))*100}%">BLD</div>
+                        <div class="gantt-seg bg-empty" style="width:${(gBE/(100-left))*100}%"></div>
+                        <div class="gantt-seg bg-elec" style="width:${(wE/(100-left))*100}%">ELC</div>
+                        <div class="gantt-seg bg-empty" style="width:${(gET/(100-left))*100}%"></div>
+                        <div class="gantt-seg bg-test" style="width:${(wT/(100-left))*100}%">TST</div>
+                    </div>
+                </div>`;
+            list.appendChild(row);
+        });
+    }
+
+    function renderHolidays() {
+        const grid = document.getElementById('holiday-grid'); grid.innerHTML = '';
+        [2026, 2027].forEach(y => {
+            for(let m=0; m<12; m++){
+                const card = document.createElement('div'); card.className = 'month-card';
+                card.innerHTML = `<div class="month-name">${y} / ${String(m+1).padStart(2, '0')}</div>`;
+                const days = document.createElement('div'); days.className = 'day-grid';
+                const first = new Date(y, m, 1);
+                for(let i=0; i<first.getDay(); i++) {
+                    const empty = document.createElement('div'); empty.className = 'day-cell empty'; days.appendChild(empty);
+                }
+                const last = new Date(y, m+1, 0).getDate();
+                for(let d=1; d<=last; d++){
+                    const ds = formatDate(new Date(y,m,d));
+                    const cell = document.createElement('div'); cell.className = 'day-cell' + (customHolidays.has(ds)?' holiday':'');
+                    cell.innerText = d;
+                    cell.onclick = () => {
+                        if(customHolidays.has(ds)) customHolidays.delete(ds); else customHolidays.add(ds);
+                        localStorage.setItem('press_holidays', JSON.stringify([...customHolidays])); renderHolidays();
+                    };
+                    days.appendChild(cell);
+                }
+                card.appendChild(days); grid.appendChild(card);
+            }
+        });
+    }
+
     function saveProject() {
-        alert("System: Master board sync successful.");
+        if(!computedData.source.comp || !computedData.source.fact) return alert("PARAM_ERROR: MISSING METADATA");
+        savedProjects.unshift({ id: Date.now(), ...computedData.source });
+        localStorage.setItem('press_master_v2', JSON.stringify(savedProjects));
+        alert("SUCCESS: PROJECT COMMITTED TO MATRIX.");
     }
-    
+
+    function generateExcelData(s, e, r) {
+        let curr = new Date(s); let out = [];
+        while(curr <= e) {
+            let l = ""; if(isWorkDay(curr)) {
+                const cs = formatDate(curr);
+                if(cs >= formatDate(r.bS) && cs <= formatDate(r.bE)) l = "組";
+                else if(cs >= formatDate(r.eS) && cs <= formatDate(r.eE)) l = "電";
+                else if(cs >= formatDate(r.tS) && cs <= formatDate(r.tE)) l = "試";
+                else l = "空";
+            }
+            out.push(l); curr.setDate(curr.getDate() + 1);
+        }
+        computedData.dayMap = out;
+    }
+
     function copyExcelData() {
-        alert("Clipboard: Data sequence copied.");
+        navigator.clipboard.writeText(computedData.dayMap.join('\t')).then(() => alert("CLIPBOARD: DATA ARRAY COPIED."));
     }
+
+    // Initialize
+    window.onload = () => {
+        const h = localStorage.getItem('press_holidays');
+        if (h) customHolidays = new Set(JSON.parse(h));
+        const p = localStorage.getItem('press_master_v2');
+        if (p) savedProjects = JSON.parse(p);
+        document.getElementById('deadline').value = "2026-10-28";
+        calculate();
+    };
 </script>
 </body>
 </html>
